@@ -25,3 +25,23 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+---
+
+Scaffold notes for Gestor de Gastos Personales
+
+- This repo now includes:
+  - Models: `src/app/models/*` (Expense, Income, Category)
+  - Core services: `src/app/core/*` (StorageService using Dexie fallback, ExpenseService, IncomeService, StateService using Signals)
+  - Shared pipes: `src/app/shared/*` (filterByMonth, filterByCategory)
+  - Basic standalone components: dashboard, expense-list, income-list, stats
+  - Tailwind config and PostCSS wiring. Add `npm install` to install new deps.
+
+Next steps (suggested):
+
+1. Install deps: `npm install` (this will add tailwind, dexie, chart libs, and Angular Material).
+2. Implement reactive forms for creating/updating expenses & incomes using `@angular/forms` and Angular Material components.
+3. Wire ng2-charts charts in `src/app/components/stats`.
+4. Add unit tests for services and pipes.
+
+If you want, I can continue and implement the reactive forms, full Material UI, and chart components next.
