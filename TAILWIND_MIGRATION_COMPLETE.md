@@ -10,10 +10,6 @@
 - **LineChartComponent**: Gráficos de líneas con controles de periodo
 - **ChartFiltersComponent**: Sistema de filtros interactivos
 
-### 🎨 Migración CSS → Tailwind CSS
-
-Todos los componentes han sido migrados exitosamente de CSS custom a Tailwind CSS:
-
 #### StatsComponent
 
 - ✅ Template convertido a Tailwind CSS
