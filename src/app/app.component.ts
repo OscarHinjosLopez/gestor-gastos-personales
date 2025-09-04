@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CurrencyPipe, CommonModule } from '@angular/common';
 import { StateService } from './core/state.service';
 import { LoadingService } from './core/loading.service';
@@ -31,10 +31,8 @@ export class AppComponent {
   title = 'gestor-gastos-personales';
   activeTab = signal<'expenses' | 'incomes' | 'stats'>('expenses');
 
-  constructor(
-    private stateService: StateService,
-    private loadingService: LoadingService
-  ) {}
+  private stateService = inject(StateService);
+  private loadingService = inject(LoadingService);
 
   get balance() {
     return this.stateService.balance;

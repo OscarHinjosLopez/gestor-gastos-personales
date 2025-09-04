@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from './notification.service';
 
@@ -95,7 +95,7 @@ import { NotificationService, Notification } from './notification.service';
   `,
 })
 export class NotificationContainerComponent {
-  constructor(public notificationService: NotificationService) {}
+  public notificationService = inject(NotificationService);
 
   trackByFn(index: number, notification: Notification): string {
     return notification.id;

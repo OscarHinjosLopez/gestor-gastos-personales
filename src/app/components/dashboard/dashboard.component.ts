@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { StateService } from '../../core/state.service';
 
@@ -113,7 +113,7 @@ import { StateService } from '../../core/state.service';
   `,
 })
 export class DashboardComponent {
-  constructor(public state: StateService) {}
+  public state = inject(StateService);
 
   balance = this.state.balance;
 
