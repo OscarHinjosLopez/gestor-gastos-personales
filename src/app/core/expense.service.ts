@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { StorageService } from './storage.service';
 import { Expense } from '../models/expense.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
-  constructor(private storage: StorageService) {}
+  private storage = inject(StorageService);
 
   getAll() {
     return this.storage.getAll<Expense>('expenses');

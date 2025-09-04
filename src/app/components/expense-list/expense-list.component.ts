@@ -1,7 +1,8 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StateService } from '../../core/state.service';
+import { Expense } from '../../models/expense.model';
 
 @Component({
   selector: 'app-expense-list',
@@ -150,7 +151,7 @@ export class ExpenseListComponent {
   selectedMonth = signal<string>('');
   selectedCategory = signal<string>('');
 
-  constructor(public state: StateService) {}
+  public state = inject(StateService);
 
   filteredExpenses = computed(() => {
     let expenses = this.state.expenses();
@@ -193,7 +194,7 @@ export class ExpenseListComponent {
     }
   }
 
-  onEdit(expense: any) {
+  onEdit(expense: Expense) {
     // TODO: Implementar edición inline o modal
     console.log('Editar gasto:', expense);
   }

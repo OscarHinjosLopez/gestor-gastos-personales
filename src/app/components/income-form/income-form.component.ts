@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { StateService } from '../../core/state.service';
@@ -142,6 +142,9 @@ import { StateService } from '../../core/state.service';
   `,
 })
 export class IncomeFormComponent {
+  private fb = inject(FormBuilder);
+  private state = inject(StateService);
+
   isSubmitting = false;
 
   incomeSources = [
@@ -162,19 +165,19 @@ export class IncomeFormComponent {
     notes: [''],
   });
 
-  constructor(private fb: FormBuilder, private state: StateService) {}
-
   async onSubmit() {
     if (this.form.valid && !this.isSubmitting) {
       this.isSubmitting = true;
       try {
-        const raw = this.form.value as any;
-        await this.state.addIncome({
-          amount: Number(raw.amount),
-          date: raw.date,
-          source: raw.source,
-          notes: raw.notes,
-        });
+        const raw = this.form.value;
+        if (raw.amount && raw.date) {
+          await this.state.addIncome({
+            amount: Number(raw.amount),
+            date: raw.date,
+            source: raw.source || '',
+            notes: raw.notes || '',
+          });
+        }
         this.form.reset({
           date: new Date().toISOString().slice(0, 10),
           source: '',

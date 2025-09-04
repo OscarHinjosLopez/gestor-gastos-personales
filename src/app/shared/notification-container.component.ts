@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../core/notification.service';
 
@@ -76,7 +76,7 @@ import { NotificationService } from '../core/notification.service';
   ],
 })
 export class NotificationContainerComponent {
-  constructor(public notificationService: NotificationService) {}
+  public notificationService = inject(NotificationService);
 
   getNotificationClasses(type: string): string {
     const baseClasses = 'bg-white border-l-4';

@@ -1,186 +1,274 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { StateService } from '../../core/state.service';
+import { ChartService } from '../../core/chart.service';
+import {
+  PieChartComponent,
+  BarChartComponent,
+  LineChartComponent,
+  ChartFiltersComponent,
+  BarChartDataset,
+  LineChartDataset,
+  ChartFilters,
+} from '../charts';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe],
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    PieChartComponent,
+    BarChartComponent,
+    LineChartComponent,
+    ChartFiltersComponent,
+  ],
   template: `
-    <div class="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-6">
-        📊 Estadísticas y Análisis
-      </h3>
+    <div class="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
+      <div class="text-center mb-8">
+        <h3 class="text-3xl font-bold text-gray-800 mb-2">
+          📊 Estadísticas y Análisis Financiero
+        </h3>
+        <p class="text-lg text-gray-500">
+          Visualización interactiva de tus finanzas personales
+        </p>
+      </div>
 
       <!-- Resumen rápido -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-blue-50 rounded-lg p-4 text-center">
-          <div class="text-2xl font-bold text-blue-600">
-            {{ monthlyStats().balance | currency : 'EUR' : 'symbol' : '1.0-0' }}
+      <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center gap-4 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            <div class="text-4xl opacity-80">💰</div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold text-blue-600 mb-1">
+                {{
+                  monthlyStats().balance | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}
+              </div>
+              <div class="text-sm text-gray-500 font-medium">
+                Balance del Mes
+              </div>
+            </div>
           </div>
-          <div class="text-sm text-blue-600">Balance del Mes</div>
-        </div>
-        <div class="bg-green-50 rounded-lg p-4 text-center">
-          <div class="text-2xl font-bold text-green-600">
-            {{
-              monthlyStats().totalIncomes
-                | currency : 'EUR' : 'symbol' : '1.0-0'
-            }}
+          <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center gap-4 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            <div class="text-4xl opacity-80">📈</div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold text-green-600 mb-1">
+                {{
+                  monthlyStats().totalIncomes
+                    | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}
+              </div>
+              <div class="text-sm text-gray-500 font-medium">
+                Ingresos del Mes
+              </div>
+            </div>
           </div>
-          <div class="text-sm text-green-600">Ingresos del Mes</div>
-        </div>
-        <div class="bg-red-50 rounded-lg p-4 text-center">
-          <div class="text-2xl font-bold text-red-600">
-            {{
-              monthlyStats().totalExpenses
-                | currency : 'EUR' : 'symbol' : '1.0-0'
-            }}
+          <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center gap-4 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            <div class="text-4xl opacity-80">📉</div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold text-red-600 mb-1">
+                {{
+                  monthlyStats().totalExpenses
+                    | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}
+              </div>
+              <div class="text-sm text-gray-500 font-medium">
+                Gastos del Mes
+              </div>
+            </div>
           </div>
-          <div class="text-sm text-red-600">Gastos del Mes</div>
-        </div>
-        <div class="bg-purple-50 rounded-lg p-4 text-center">
-          <div class="text-2xl font-bold text-purple-600">
-            {{ averageDailyExpense() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+          <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center gap-4 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            <div class="text-4xl opacity-80">📊</div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold text-purple-600 mb-1">
+                {{
+                  averageDailyExpense() | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}
+              </div>
+              <div class="text-sm text-gray-500 font-medium">
+                Gasto Diario Promedio
+              </div>
+            </div>
           </div>
-          <div class="text-sm text-purple-600">Gasto Diario Promedio</div>
         </div>
       </div>
 
-      <!-- Distribución por categorías -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Gastos por categoría -->
-        <div>
-          <h4 class="text-lg font-medium text-gray-900 mb-4">
-            💸 Gastos por Categoría
-          </h4>
-          <div class="space-y-3">
-            @for (category of expensesByCategory(); track category.name) {
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <div
-                  class="w-4 h-4 rounded"
-                  [style.background-color]="getCategoryColor(category.name)"
-                ></div>
-                <span class="text-sm font-medium text-gray-700">{{
-                  category.name
-                }}</span>
-              </div>
-              <div class="flex items-center space-x-3">
-                <div class="w-32 bg-gray-200 rounded-full h-2">
-                  <div
-                    class="h-2 rounded-full"
-                    [style.background-color]="getCategoryColor(category.name)"
-                    [style.width.%]="category.percentage"
-                  ></div>
-                </div>
-                <span
-                  class="text-sm font-semibold text-gray-900 w-16 text-right"
-                >
-                  {{ category.amount | currency : 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
-              </div>
+      <!-- Filtros interactivos -->
+      <div class="mb-8">
+        <app-chart-filters
+          [availableCategories]="getAvailableCategories()"
+          [availableSources]="getAvailableSources()"
+          (filtersChange)="onFiltersChange($event)"
+        >
+        </app-chart-filters>
+      </div>
+
+      <!-- Gráficos principales -->
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+        <!-- Gráfico de gastos por categoría -->
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <app-pie-chart
+            [data]="expensesByCategory()"
+            [title]="'Distribución de Gastos por Categoría'"
+            [height]="350"
+            [chartType]="'doughnut'"
+            [showLegend]="true"
+            [noDataTitle]="'Sin gastos registrados'"
+            [noDataMessage]="
+              'Agrega gastos para ver la distribución por categorías'
+            "
+          >
+          </app-pie-chart>
+        </div>
+
+        <!-- Gráfico de ingresos por fuente -->
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <app-bar-chart
+            [labels]="incomesBySourceLabels()"
+            [datasets]="incomesBySourceDatasets()"
+            [title]="'Ingresos por Fuente'"
+            [height]="350"
+            [horizontal]="false"
+            [noDataTitle]="'Sin ingresos registrados'"
+            [noDataMessage]="
+              'Agrega ingresos para ver la distribución por fuentes'
+            "
+          >
+          </app-bar-chart>
+        </div>
+
+        <!-- Comparación mensual ingresos vs gastos -->
+        <div
+          class="col-span-1 xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <app-bar-chart
+            [labels]="monthlyComparisonLabels()"
+            [datasets]="monthlyComparisonDatasets()"
+            [title]="'Comparación Mensual: Ingresos vs Gastos'"
+            [height]="400"
+            [stacked]="false"
+            [noDataTitle]="'Sin datos mensuales'"
+            [noDataMessage]="
+              'Se necesitan al menos 2 meses de datos para mostrar la comparación'
+            "
+          >
+          </app-bar-chart>
+        </div>
+
+        <!-- Tendencia del balance -->
+        <div
+          class="col-span-1 xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <app-line-chart
+            [labels]="balanceTrendLabels()"
+            [datasets]="balanceTrendDatasets()"
+            [title]="'Evolución del Balance Financiero'"
+            [height]="400"
+            [showControls]="true"
+            [showSummary]="true"
+            [noDataTitle]="'Sin historial de balance'"
+            [noDataMessage]="
+              'Necesitas al menos 3 meses de datos para ver la tendencia'
+            "
+          >
+          </app-line-chart>
+        </div>
+      </div>
+
+      <!-- Estadísticas adicionales -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h5 class="text-sm font-semibold text-gray-600 mb-3 mt-0">
+              🎯 Categoría con Mayor Gasto
+            </h5>
+            @if (topExpenseCategory(); as topCategory) {
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold text-gray-800">{{
+                topCategory.name
+              }}</span>
+              <span class="text-sm text-gray-500">
+                {{ topCategory.amount | currency : 'EUR' : 'symbol' : '1.0-0' }}
+                ({{ topCategory.percentage.toFixed(1) }}%)
+              </span>
             </div>
-            } @empty {
-            <div class="text-center py-4 text-gray-500">
-              No hay gastos para mostrar
+            } @else {
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold text-gray-800">No hay datos</span>
             </div>
             }
           </div>
-        </div>
 
-        <!-- Ingresos por fuente -->
-        <div>
-          <h4 class="text-lg font-medium text-gray-900 mb-4">
-            💰 Ingresos por Fuente
-          </h4>
-          <div class="space-y-3">
-            @for (source of incomesBySource(); track source.name) {
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 rounded bg-green-500"></div>
-                <span class="text-sm font-medium text-gray-700">{{
-                  source.name
-                }}</span>
-              </div>
-              <div class="flex items-center space-x-3">
-                <div class="w-32 bg-gray-200 rounded-full h-2">
-                  <div
-                    class="bg-green-500 h-2 rounded-full"
-                    [style.width.%]="source.percentage"
-                  ></div>
-                </div>
-                <span
-                  class="text-sm font-semibold text-gray-900 w-16 text-right"
-                >
-                  {{ source.amount | currency : 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
-              </div>
+          <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h5 class="text-sm font-semibold text-gray-600 mb-3 mt-0">
+              💼 Fuente Principal de Ingresos
+            </h5>
+            @if (topIncomeSource(); as topSource) {
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold text-gray-800">{{
+                topSource.name
+              }}</span>
+              <span class="text-sm text-gray-500">
+                {{ topSource.amount | currency : 'EUR' : 'symbol' : '1.0-0' }}
+                ({{ topSource.percentage.toFixed(1) }}%)
+              </span>
             </div>
-            } @empty {
-            <div class="text-center py-4 text-gray-500">
-              No hay ingresos para mostrar
+            } @else {
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold text-gray-800">No hay datos</span>
             </div>
             }
           </div>
-        </div>
-      </div>
 
-      <!-- Tendencias mensuales -->
-      <div class="mt-8">
-        <h4 class="text-lg font-medium text-gray-900 mb-4">
-          📈 Tendencia de los Últimos Meses
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          @for (month of lastMonthsData(); track month.month) {
-          <div class="border rounded-lg p-4">
-            <div class="text-sm font-medium text-gray-600 mb-2">
-              {{ month.month }}
-            </div>
-            <div class="space-y-1">
-              <div class="flex justify-between text-sm">
-                <span class="text-green-600">Ingresos:</span>
-                <span class="font-medium">{{
-                  month.incomes | currency : 'EUR' : 'symbol' : '1.0-0'
-                }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-red-600">Gastos:</span>
-                <span class="font-medium">{{
-                  month.expenses | currency : 'EUR' : 'symbol' : '1.0-0'
-                }}</span>
-              </div>
-              <div class="flex justify-between text-sm border-t pt-1">
-                <span class="font-medium">Balance:</span>
-                <span
-                  class="font-bold"
-                  [class]="
-                    month.balance >= 0 ? 'text-green-600' : 'text-red-600'
-                  "
-                >
-                  {{ month.balance | currency : 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
-              </div>
+          <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h5 class="text-sm font-semibold text-gray-600 mb-3 mt-0">
+              📅 Días con Gastos
+            </h5>
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold text-gray-800">{{
+                daysWithExpenses()
+              }}</span>
+              <span class="text-sm text-gray-500"
+                >de {{ daysInCurrentMonth() }} días</span
+              >
             </div>
           </div>
-          }
-        </div>
-      </div>
 
-      <!-- Próximamente -->
-      <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-        <h5 class="font-medium text-blue-900 mb-2">🚀 Próximamente</h5>
-        <ul class="text-sm text-blue-700 space-y-1">
-          <li>• Gráficos interactivos con Chart.js</li>
-          <li>• Comparación de períodos</li>
-          <li>• Proyecciones de gastos</li>
-          <li>• Alertas de presupuesto</li>
-        </ul>
+          <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h5 class="text-sm font-semibold text-gray-600 mb-3 mt-0">
+              🔄 Tasa de Ahorro
+            </h5>
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold" [class]="getSavingsRateClass()">
+                {{ savingsRate().toFixed(1) }}%
+              </span>
+              <span class="text-sm text-gray-500">del ingreso total</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
+  styles: [],
 })
 export class StatsComponent {
-  constructor(public state: StateService) {}
+  private state = inject(StateService);
+  private chartService = inject(ChartService);
+
+  currentFilters: ChartFilters | null = null;
 
   monthlyStats = computed(() => {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -291,6 +379,133 @@ export class StatsComponent {
 
     return months;
   });
+
+  // Métodos para los gráficos de Chart.js
+  incomesBySourceLabels = computed(() => {
+    return this.incomesBySource().map((source) => source.name);
+  });
+
+  incomesBySourceDatasets = computed((): BarChartDataset[] => {
+    const data = this.incomesBySource().map((source) => source.amount);
+    if (data.length === 0) return [];
+
+    return [
+      {
+        label: 'Ingresos por fuente',
+        data,
+        backgroundColor: this.chartService.getIncomeColor() + '80',
+        borderColor: this.chartService.getIncomeColor(),
+      },
+    ];
+  });
+
+  monthlyComparisonLabels = computed(() => {
+    return this.lastMonthsData().map((month) => month.month);
+  });
+
+  monthlyComparisonDatasets = computed((): BarChartDataset[] => {
+    const monthsData = this.lastMonthsData();
+    if (monthsData.length === 0) return [];
+
+    return [
+      {
+        label: 'Ingresos',
+        data: monthsData.map((month) => month.incomes),
+        backgroundColor: this.chartService.getIncomeColor() + '80',
+        borderColor: this.chartService.getIncomeColor(),
+      },
+      {
+        label: 'Gastos',
+        data: monthsData.map((month) => month.expenses),
+        backgroundColor: this.chartService.getExpenseColor() + '80',
+        borderColor: this.chartService.getExpenseColor(),
+      },
+    ];
+  });
+
+  balanceTrendLabels = computed(() => {
+    return this.lastMonthsData().map((month) => month.month);
+  });
+
+  balanceTrendDatasets = computed((): LineChartDataset[] => {
+    const monthsData = this.lastMonthsData();
+    if (monthsData.length === 0) return [];
+
+    return [
+      {
+        label: 'Balance',
+        data: monthsData.map((month) => month.balance),
+        borderColor: this.chartService.getBalanceColor(),
+        backgroundColor: this.chartService.getBalanceColor() + '20',
+        fill: true,
+        tension: 0.4,
+      },
+    ];
+  });
+
+  topExpenseCategory = computed(() => {
+    const categories = this.expensesByCategory();
+    return categories.length > 0 ? categories[0] : null;
+  });
+
+  topIncomeSource = computed(() => {
+    const sources = this.incomesBySource();
+    return sources.length > 0 ? sources[0] : null;
+  });
+
+  daysWithExpenses = computed(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const monthlyExpenses = this.state
+      .expenses()
+      .filter((e) => e.date.startsWith(currentMonth));
+
+    const uniqueDays = new Set(
+      monthlyExpenses.map((expense) => expense.date.split('T')[0])
+    );
+
+    return uniqueDays.size;
+  });
+
+  daysInCurrentMonth = computed(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  });
+
+  savingsRate = computed(() => {
+    const stats = this.monthlyStats();
+    if (stats.totalIncomes === 0) return 0;
+    return (stats.balance / stats.totalIncomes) * 100;
+  });
+
+  getSavingsRateClass(): string {
+    const rate = this.savingsRate();
+    if (rate >= 20) return 'text-green-600';
+    if (rate >= 10) return 'text-yellow-600';
+    return 'text-red-600';
+  }
+
+  // Métodos para filtros
+  getAvailableCategories(): string[] {
+    const expenses = this.state.expenses();
+    const categories = [
+      ...new Set(expenses.map((e) => e.category).filter(Boolean)),
+    ];
+    return categories.sort();
+  }
+
+  getAvailableSources(): string[] {
+    const incomes = this.state.incomes();
+    const sources = [
+      ...new Set(incomes.map((i) => i.source).filter(Boolean) as string[]),
+    ];
+    return sources.sort();
+  }
+
+  onFiltersChange(filters: ChartFilters): void {
+    this.currentFilters = filters;
+    // Aquí se pueden aplicar los filtros a los datos
+    // Por ahora solo los almacenamos
+  }
 
   getCategoryColor(category: string): string {
     const colors = [

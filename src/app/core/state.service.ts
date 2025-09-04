@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Expense } from '../models/expense.model';
 import { Income } from '../models/income.model';
 import { ExpenseService } from './expense.service';
@@ -24,12 +24,12 @@ export class StateService {
       this._expenses().reduce((s, e) => s + (e.amount ?? 0), 0)
   );
 
-  constructor(
-    private expSvc: ExpenseService,
-    private incSvc: IncomeService,
-    private loadingService: LoadingService,
-    private notificationService: NotificationService
-  ) {
+  private expSvc = inject(ExpenseService);
+  private incSvc = inject(IncomeService);
+  private loadingService = inject(LoadingService);
+  private notificationService = inject(NotificationService);
+
+  constructor() {
     this.loadAll();
   }
 

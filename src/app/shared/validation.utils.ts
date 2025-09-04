@@ -1,4 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { Expense } from '../models/expense.model';
+import { Income } from '../models/income.model';
 
 @Pipe({
   name: 'sanitize',
@@ -68,13 +70,13 @@ export class DataValidator {
   }
 
   static sanitizeAmount(amount: number | null | undefined): number {
-    if (!amount || !this.isValidAmount(amount)) return 0;
+    if (amount === null || amount === undefined || !this.isValidAmount(amount)) return 0;
 
     // Round to 2 decimal places
     return Math.round(amount * 100) / 100;
   }
 
-  static validateExpense(expense: any): { isValid: boolean; errors: string[] } {
+  static validateExpense(expense: Partial<Expense>): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!this.isValidAmount(expense.amount)) {
@@ -96,7 +98,7 @@ export class DataValidator {
     return { isValid: errors.length === 0, errors };
   }
 
-  static validateIncome(income: any): { isValid: boolean; errors: string[] } {
+  static validateIncome(income: Partial<Income>): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!this.isValidAmount(income.amount)) {
