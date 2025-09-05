@@ -139,6 +139,12 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    console.log('🔍 ngOnChanges: Changes detected', {
+      hasComparison: changes['comparison']?.currentValue ? 'yes' : 'no',
+      dataType: this.dataType,
+      chartType: this.chartType
+    });
+    
     if (changes['comparison'] || changes['dataType'] || changes['chartType']) {
       this.updateChart();
     }
@@ -151,10 +157,19 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createChart(): void {
-    if (!this.comparison || !this.canvasRef) return;
+    if (!this.comparison || !this.canvasRef) {
+      console.log('🔍 createChart: Missing comparison or canvas', {
+        hasComparison: !!this.comparison,
+        hasCanvas: !!this.canvasRef
+      });
+      return;
+    }
 
     const ctx = this.canvasRef.nativeElement.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.log('🔍 createChart: No 2D context available');
+      return;
+    }
 
     // Destroy existing chart
     if (this.chart) {
@@ -162,7 +177,19 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     const config = this.getChartConfig();
-    this.chart = new Chart(ctx, config);
+    console.log('🔍 createChart: Creating chart with config', {
+      type: config.type,
+      dataLabels: config.data.labels,
+      datasets: config.data.datasets?.length || 0,
+      dataType: this.dataType
+    });
+
+    try {
+      this.chart = new Chart(ctx, config);
+      console.log('🔍 createChart: Chart created successfully');
+    } catch (error) {
+      console.error('🔍 createChart: Error creating chart', error);
+    }
   }
 
   private updateChart(): void {
@@ -187,16 +214,25 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private getChartData() {
     if (!this.comparison) {
+      console.log('🔍 getChartData: No comparison data');
       return { labels: [], datasets: [] };
     }
 
+    console.log('🔍 getChartData: Processing data type:', this.dataType);
+
     switch (this.dataType) {
       case 'categories':
-        return this.getCategoryComparisonData();
+        const catData = this.getCategoryComparisonData();
+        console.log('🔍 getChartData: Category data', catData);
+        return catData;
       case 'sources':
-        return this.getSourceComparisonData();
+        const srcData = this.getSourceComparisonData();
+        console.log('🔍 getChartData: Source data', srcData);
+        return srcData;
       default:
-        return this.getMetricComparisonData();
+        const metricData = this.getMetricComparisonData();
+        console.log('🔍 getChartData: Metric data', metricData);
+        return metricData;
     }
   }
 

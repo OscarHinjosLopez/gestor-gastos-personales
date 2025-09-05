@@ -3,6 +3,7 @@ import {
   computed,
   inject,
   ChangeDetectionStrategy,
+  signal,
 } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { StateService } from '../../core/state.service';
@@ -189,6 +190,7 @@ import {
             [noDataMessage]="
               'Necesitas al menos 3 meses de datos para ver la tendencia'
             "
+            (periodChange)="onPeriodChange($event)"
           >
           </app-line-chart>
         </div>
@@ -274,7 +276,8 @@ export class StatsComponent {
   private state = inject(StateService);
   private chartService = inject(ChartService);
 
-  currentFilters: ChartFilters | null = null;
+  currentFilters = signal<ChartFilters | null>(null);
+  selectedBalancePeriod = signal('6m'); // Signal reactivo
 
   monthlyStats = computed(() => {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -311,8 +314,124 @@ export class StatsComponent {
     return uniqueDays > 0 ? total / uniqueDays : 0;
   });
 
+  // Función auxiliar para filtrar gastos según filtros activos
+  private filterExpenses(expenses: any[]) {
+    const filters = this.currentFilters();
+    if (!filters) return expenses;
+
+    return expenses.filter(expense => {
+      // Filtro por rango de fechas
+      if (filters.dateRange) {
+        const expenseDate = expense.date.split('T')[0];
+        if (expenseDate < filters.dateRange.start || expenseDate > filters.dateRange.end) {
+          return false;
+        }
+      }
+
+      // Filtro por categorías
+      if (filters.categories && filters.categories.length > 0) {
+        if (!filters.categories.includes(expense.category || 'Sin categoría')) {
+          return false;
+        }
+      }
+
+      // Filtro por rango de montos
+      if (filters.minAmount !== undefined && expense.amount < filters.minAmount) {
+        return false;
+      }
+      if (filters.maxAmount !== undefined && expense.amount > filters.maxAmount) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  // Función auxiliar para filtrar ingresos según filtros activos
+  private filterIncomes(incomes: any[]) {
+    const filters = this.currentFilters();
+    if (!filters) return incomes;
+
+    return incomes.filter(income => {
+      // Filtro por rango de fechas
+      if (filters.dateRange) {
+        const incomeDate = income.date.split('T')[0];
+        if (incomeDate < filters.dateRange.start || incomeDate > filters.dateRange.end) {
+          return false;
+        }
+      }
+
+      // Filtro por fuentes
+      if (filters.sources && filters.sources.length > 0) {
+        if (!filters.sources.includes(income.source || 'Ingreso general')) {
+          return false;
+        }
+      }
+
+      // Filtro por rango de montos
+      if (filters.minAmount !== undefined && income.amount < filters.minAmount) {
+        return false;
+      }
+      if (filters.maxAmount !== undefined && income.amount > filters.maxAmount) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  // Versiones sin filtro de fechas para gráficos mensuales
+  private filterExpensesWithoutDate(expenses: any[]) {
+    const filters = this.currentFilters();
+    if (!filters) return expenses;
+
+    return expenses.filter(expense => {
+      // Filtro por categorías
+      if (filters.categories && filters.categories.length > 0) {
+        if (!filters.categories.includes(expense.category || 'Sin categoría')) {
+          return false;
+        }
+      }
+
+      // Filtro por rango de montos
+      if (filters.minAmount !== undefined && expense.amount < filters.minAmount) {
+        return false;
+      }
+      if (filters.maxAmount !== undefined && expense.amount > filters.maxAmount) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  private filterIncomesWithoutDate(incomes: any[]) {
+    const filters = this.currentFilters();
+    if (!filters) return incomes;
+
+    return incomes.filter(income => {
+      // Filtro por fuentes
+      if (filters.sources && filters.sources.length > 0) {
+        if (!filters.sources.includes(income.source || 'Ingreso general')) {
+          return false;
+        }
+      }
+
+      // Filtro por rango de montos
+      if (filters.minAmount !== undefined && income.amount < filters.minAmount) {
+        return false;
+      }
+      if (filters.maxAmount !== undefined && income.amount > filters.maxAmount) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
   expensesByCategory = computed(() => {
-    const expenses = this.state.expenses();
+    const allExpenses = this.state.expenses();
+    const expenses = this.filterExpenses(allExpenses);
     const total = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     if (total === 0) return [];
@@ -326,14 +445,15 @@ export class StatsComponent {
     return Object.entries(categories)
       .map(([name, amount]) => ({
         name,
-        amount,
-        percentage: (amount / total) * 100,
+        amount: amount as number,
+        percentage: ((amount as number) / total) * 100,
       }))
       .sort((a, b) => b.amount - a.amount);
   });
 
   incomesBySource = computed(() => {
-    const incomes = this.state.incomes();
+    const allIncomes = this.state.incomes();
+    const incomes = this.filterIncomes(allIncomes);
     const total = incomes.reduce((sum, i) => sum + (i.amount || 0), 0);
 
     if (total === 0) return [];
@@ -347,17 +467,19 @@ export class StatsComponent {
     return Object.entries(sources)
       .map(([name, amount]) => ({
         name,
-        amount,
-        percentage: (amount / total) * 100,
+        amount: amount as number,
+        percentage: ((amount as number) / total) * 100,
       }))
       .sort((a, b) => b.amount - a.amount);
   });
 
-  lastMonthsData = computed(() => {
+  // Datos históricos sin filtros para gráficos de tendencias
+  lastMonthsDataRaw = computed(() => {
     const months = [];
     const now = new Date();
+    const monthsToShow = this.getMonthsFromPeriod(this.selectedBalancePeriod());
 
-    for (let i = 2; i >= 0; i--) {
+    for (let i = monthsToShow - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthStr = date.toISOString().slice(0, 7);
       const monthName = date.toLocaleDateString('es-ES', {
@@ -368,12 +490,52 @@ export class StatsComponent {
       const monthIncomes = this.state
         .incomes()
         .filter((i) => i.date.startsWith(monthStr))
-        .reduce((sum, i) => sum + (i.amount || 0), 0);
+        .reduce((sum: number, i: any) => sum + (i.amount || 0), 0);
 
       const monthExpenses = this.state
         .expenses()
         .filter((e) => e.date.startsWith(monthStr))
-        .reduce((sum, e) => sum + (e.amount || 0), 0);
+        .reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+
+      months.push({
+        month: monthName,
+        incomes: monthIncomes,
+        expenses: monthExpenses,
+        balance: monthIncomes - monthExpenses,
+      });
+    }
+
+    return months;
+  });
+
+  // Datos filtrados para análisis específicos
+  lastMonthsData = computed(() => {
+    const months = [];
+    const now = new Date();
+    const monthsToShow = this.getMonthsFromPeriod(this.selectedBalancePeriod());
+
+    for (let i = monthsToShow - 1; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStr = date.toISOString().slice(0, 7);
+      const monthName = date.toLocaleDateString('es-ES', {
+        month: 'long',
+        year: 'numeric',
+      });
+
+      // Aplicar filtros solo por categorías/fuentes y rango de montos, no por fechas
+      const allMonthIncomes = this.state
+        .incomes()
+        .filter((i) => i.date.startsWith(monthStr));
+      
+      const allMonthExpenses = this.state
+        .expenses()
+        .filter((e) => e.date.startsWith(monthStr));
+
+      const filteredMonthIncomes = this.filterIncomesWithoutDate(allMonthIncomes);
+      const filteredMonthExpenses = this.filterExpensesWithoutDate(allMonthExpenses);
+
+      const monthIncomes = filteredMonthIncomes.reduce((sum: number, i: any) => sum + (i.amount || 0), 0);
+      const monthExpenses = filteredMonthExpenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
 
       months.push({
         month: monthName,
@@ -406,11 +568,11 @@ export class StatsComponent {
   });
 
   monthlyComparisonLabels = computed(() => {
-    return this.lastMonthsData().map((month) => month.month);
+    return this.lastMonthsDataRaw().map((month) => month.month);
   });
 
   monthlyComparisonDatasets = computed((): BarChartDataset[] => {
-    const monthsData = this.lastMonthsData();
+    const monthsData = this.lastMonthsDataRaw();
     if (monthsData.length === 0) return [];
 
     return [
@@ -430,11 +592,11 @@ export class StatsComponent {
   });
 
   balanceTrendLabels = computed(() => {
-    return this.lastMonthsData().map((month) => month.month);
+    return this.lastMonthsDataRaw().map((month) => month.month);
   });
 
   balanceTrendDatasets = computed((): LineChartDataset[] => {
-    const monthsData = this.lastMonthsData();
+    const monthsData = this.lastMonthsDataRaw();
     if (monthsData.length === 0) return [];
 
     return [
@@ -508,9 +670,26 @@ export class StatsComponent {
   }
 
   onFiltersChange(filters: ChartFilters): void {
-    this.currentFilters = filters;
-    // Aquí se pueden aplicar los filtros a los datos
-    // Por ahora solo los almacenamos
+    this.currentFilters.set(filters);
+    // Los computed se recalcularán automáticamente
+  }
+
+  getMonthsFromPeriod(period: string): number {
+    switch (period) {
+      case '3m':
+        return 3;
+      case '6m':
+        return 6;
+      case '1y':
+        return 12;
+      default:
+        return 6; // Por defecto 6 meses
+    }
+  }
+
+  onPeriodChange(period: string): void {
+    this.selectedBalancePeriod.set(period);
+    // Los computed se recalcularán automáticamente
   }
 
   getCategoryColor(category: string): string {

@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnInit,
   OnDestroy,
   ViewChild,
@@ -151,6 +153,8 @@ export class LineChartComponent
   @Input() showSummary = false;
   @Input() noDataTitle = 'Sin datos disponibles';
   @Input() noDataMessage = 'No hay información para mostrar en este momento.';
+
+  @Output() periodChange = new EventEmitter<string>();
 
   chartData?: ChartData<'line'>;
   chartOptions?: ChartConfiguration<'line'>['options'];
@@ -357,8 +361,8 @@ export class LineChartComponent
 
   selectPeriod(period: string): void {
     this.selectedPeriod = period;
-    // Emitir evento o llamar callback para filtrar datos
-    // Este método puede ser extendido según las necesidades
+    // Emitir evento para que el componente padre pueda filtrar los datos
+    this.periodChange.emit(period);
   }
 
   getValueClass(value: number): string {

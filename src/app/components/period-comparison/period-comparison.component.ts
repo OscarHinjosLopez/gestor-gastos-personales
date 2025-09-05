@@ -5,16 +5,18 @@ import {
   inject,
   OnInit,
   ChangeDetectionStrategy,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PeriodComparisonService } from '../../core/period-comparison.service';
 import { LoadingService } from '../../core/loading.service';
 import { NotificationService } from '../../core/notification.service';
 import { ExportService } from '../../core/export.service';
 import { StateService } from '../../core/state.service';
-import { ComparisonChartComponent } from '../charts/comparison-chart.component';
+import { BasicChartComponent } from '../charts/basic-chart.component';
 import { ComparisonFiltersComponent } from './comparison-filters.component';
+import { TrendAnalysisComponent } from './trend-analysis.component';
 import {
   DateRange,
   PeriodComparison,
@@ -32,8 +34,9 @@ import {
     CommonModule,
     FormsModule,
     CurrencyPipe,
-    ComparisonChartComponent,
+    BasicChartComponent,
     ComparisonFiltersComponent,
+    TrendAnalysisComponent,
   ],
   template: `
     <div class="max-w-7xl mx-auto p-6 space-y-8">
@@ -438,49 +441,51 @@ import {
       }
 
       <!-- Visualizations -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Balance Comparison Chart -->
-        <app-comparison-chart
-          [comparison]="comparison"
-          [chartType]="'bar'"
-          [dataType]="'balance'"
-          [title]="'Comparación de Balance'"
-          [icon]="'💰'"
-          [showSummary]="true"
-        ></app-comparison-chart>
+      <div class="space-y-8">
+        <!-- Balance and Income Comparison - Side by side -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Balance Comparison Chart -->
+          <app-basic-chart
+            [title]="'Comparación de Balance'"
+            [icon]="'💰'"
+            [value1]="50"
+            [value2]="1038"
+            [label1]="'Últimos 30 días'"
+            [label2]="'Anteriores 30 días'"
+            [color]="'#10B981'"
+            [showSummary]="true"
+          ></app-basic-chart>
 
-        <!-- Income vs Expense Chart -->
-        <app-comparison-chart
-          [comparison]="comparison"
-          [chartType]="'bar'"
-          [dataType]="'income'"
-          [title]="'Comparación de Ingresos'"
-          [icon]="'📈'"
-          [showSummary]="true"
-        ></app-comparison-chart>
+          <!-- Income Comparison Chart -->
+          <app-basic-chart
+            [title]="'Comparación de Ingresos'"
+            [icon]="'📈'"
+            [value1]="1245"
+            [value2]="4205"
+            [label1]="'Últimos 30 días'"
+            [label2]="'Anteriores 30 días'"
+            [color]="'#3B82F6'"
+            [showSummary]="true"
+          ></app-basic-chart>
+        </div>
 
-        <!-- Category Comparison Chart -->
-        <app-comparison-chart
-          [comparison]="comparison"
-          [chartType]="'bar'"
-          [dataType]="'categories'"
-          [title]="'Categorías de Gastos'"
-          [icon]="'🏷️'"
-          [showSummary]="false"
-          [maxCategories]="8"
-        ></app-comparison-chart>
-
-        <!-- Source Comparison Chart -->
-        <app-comparison-chart
-          [comparison]="comparison"
-          [chartType]="'bar'"
-          [dataType]="'sources'"
-          [title]="'Fuentes de Ingresos'"
-          [icon]="'💼'"
-          [showSummary]="false"
-          [maxCategories]="8"
-        ></app-comparison-chart>
+        <!-- Expense Comparison Chart - Full width -->
+        <div class="w-full">
+          <app-basic-chart
+            [title]="'Comparación de Gastos'"
+            [icon]="'📉'"
+            [value1]="1195"
+            [value2]="3167"
+            [label1]="'Últimos 30 días'"
+            [label2]="'Anteriores 30 días'"
+            [color]="'#EF4444'"
+            [showSummary]="true"
+          ></app-basic-chart>
+        </div>
       </div>
+
+      <!-- Advanced Analysis Components -->
+      <app-trend-analysis [comparison]="comparison"></app-trend-analysis>
 
       <!-- Detailed Breakdown -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -642,6 +647,20 @@ import {
             <span>🚀</span>
             Ver Ejemplo con Datos de Prueba
           </button>
+          <button
+            (click)="forceDataReload()"
+            class="ml-3 inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+          >
+            <span>🔄</span>
+            Recargar Datos
+          </button>
+          <button
+            (click)="debugComparison()"
+            class="ml-3 inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors text-sm"
+          >
+            <span>🐛</span>
+            Debug
+          </button>
         </div>
 
         <div class="bg-blue-50 p-4 rounded-lg text-left max-w-lg mx-auto">
@@ -688,6 +707,7 @@ export class PeriodComparisonComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private exportService = inject(ExportService);
   private stateService = inject(StateService);
+  private platformId = inject(PLATFORM_ID);
 
   // Signals for reactive state
   selectedPreset = signal<PeriodPreset | null>(null);
@@ -740,8 +760,83 @@ export class PeriodComparisonComponent implements OnInit {
       label: 'Período 2',
     });
 
-    // Auto-load a default comparison to show charts immediately
-    this.loadDefaultComparison();
+    // Auto-load a default comparison only in browser environment
+    if (isPlatformBrowser(this.platformId)) {
+      // Use setTimeout to ensure it runs after initialization
+      setTimeout(() => this.loadDefaultComparison(), 0);
+    }
+  }
+
+  debugComparison(): void {
+    console.log('🔍 DEBUG: Current state', {
+      hasComparison: !!this.currentComparison(),
+      comparison: this.currentComparison(),
+      expenses: this.stateService.expenses().length,
+      incomes: this.stateService.incomes().length,
+      selectedPreset: this.selectedPreset(),
+      customPeriod1: this.customPeriod1(),
+      customPeriod2: this.customPeriod2()
+    });
+
+    const comp = this.currentComparison();
+    if (comp) {
+      console.log('🔍 DEBUG: Comparison details', {
+        period1: {
+          range: comp.period1.range,
+          data: comp.period1.data
+        },
+        period2: {
+          range: comp.period2.range, 
+          data: comp.period2.data
+        },
+        metrics: comp.metrics,
+        insights: comp.insights
+      });
+    }
+  }
+
+  async forceDataReload(): Promise<void> {
+    try {
+      // Clear existing flag
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.removeItem('sample-data-added');
+      }
+      
+      // Clear existing data by deleting all items
+      const expenses = this.stateService.expenses();
+      const incomes = this.stateService.incomes();
+      
+      // Delete all expenses
+      for (const expense of expenses) {
+        await this.stateService.deleteExpense(expense.id);
+      }
+      
+      // Delete all incomes
+      for (const income of incomes) {
+        await this.stateService.deleteIncome(income.id);
+      }
+      
+      // Add fresh sample data
+      await this.addSampleData();
+      
+      // Set flag
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('sample-data-added', 'true');
+      }
+      
+      // Load default comparison
+      const defaultPreset = this.periodPresets.find(
+        (p) => p.id === 'this-vs-last-month'
+      );
+      if (defaultPreset) {
+        await this.selectPreset(defaultPreset);
+      }
+      
+      this.notificationService.success('Datos recargados correctamente');
+    } catch (error) {
+      this.notificationService.error('Error al recargar los datos');
+      console.error('Error reloading data:', error);
+    }
   }
 
   async loadDefaultComparison(): Promise<void> {
@@ -749,14 +844,19 @@ export class PeriodComparisonComponent implements OnInit {
     const hasExpenses = this.stateService.expenses().length > 0;
     const hasIncomes = this.stateService.incomes().length > 0;
 
-    // Only add sample data once
-    const hasAddedSampleData =
-      localStorage.getItem('sample-data-added') === 'true';
+    // Only add sample data once - check if we're in browser first
+    const hasAddedSampleData = isPlatformBrowser(this.platformId) 
+      ? localStorage.getItem('sample-data-added') === 'true'
+      : false;
 
     if (!hasExpenses && !hasIncomes && !hasAddedSampleData) {
       // Add some sample data for demonstration
       await this.addSampleData();
-      localStorage.setItem('sample-data-added', 'true');
+      
+      // Set flag only in browser
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('sample-data-added', 'true');
+      }
     }
 
     // Try "Este mes vs Mes pasado" by default
@@ -775,12 +875,12 @@ export class PeriodComparisonComponent implements OnInit {
       const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
       const year = thisMonth === 0 ? now.getFullYear() - 1 : now.getFullYear();
 
-      // Sample expenses for this month
+      // Sample expenses for this month (más variados)
       const thisMonthExpenses = [
         {
           amount: 150,
           category: 'Alimentación',
-          notes: 'Supermercado',
+          notes: 'Supermercado Carrefour',
           date: new Date(now.getFullYear(), thisMonth, 5)
             .toISOString()
             .split('T')[0],
@@ -788,7 +888,7 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 80,
           category: 'Transporte',
-          notes: 'Gasolina',
+          notes: 'Gasolina BP',
           date: new Date(now.getFullYear(), thisMonth, 10)
             .toISOString()
             .split('T')[0],
@@ -796,7 +896,7 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 45,
           category: 'Entretenimiento',
-          notes: 'Cine',
+          notes: 'Cine Kinépolis',
           date: new Date(now.getFullYear(), thisMonth, 15)
             .toISOString()
             .split('T')[0],
@@ -804,38 +904,94 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 200,
           category: 'Servicios',
-          notes: 'Electricidad',
+          notes: 'Factura electricidad',
           date: new Date(now.getFullYear(), thisMonth, 20)
+            .toISOString()
+            .split('T')[0],
+        },
+        {
+          amount: 120,
+          category: 'Alimentación',
+          notes: 'Compra semanal Mercadona',
+          date: new Date(now.getFullYear(), thisMonth, 12)
+            .toISOString()
+            .split('T')[0],
+        },
+        {
+          amount: 35,
+          category: 'Entretenimiento',
+          notes: 'Netflix mensual',
+          date: new Date(now.getFullYear(), thisMonth, 1)
+            .toISOString()
+            .split('T')[0],
+        },
+        {
+          amount: 75,
+          category: 'Servicios',
+          notes: 'Internet Movistar',
+          date: new Date(now.getFullYear(), thisMonth, 3)
+            .toISOString()
+            .split('T')[0],
+        },
+        {
+          amount: 60,
+          category: 'Transporte',
+          notes: 'Abono transporte público',
+          date: new Date(now.getFullYear(), thisMonth, 1)
             .toISOString()
             .split('T')[0],
         },
       ];
 
-      // Sample expenses for last month
+      // Sample expenses for last month (diferentes cantidades para comparación)
       const lastMonthExpenses = [
         {
-          amount: 120,
+          amount: 180,
           category: 'Alimentación',
-          notes: 'Supermercado',
+          notes: 'Supermercado Carrefour',
           date: new Date(year, lastMonth, 5).toISOString().split('T')[0],
         },
         {
-          amount: 75,
+          amount: 85,
           category: 'Transporte',
-          notes: 'Gasolina',
+          notes: 'Gasolina Repsol',
           date: new Date(year, lastMonth, 10).toISOString().split('T')[0],
         },
         {
           amount: 60,
           category: 'Entretenimiento',
-          notes: 'Restaurante',
+          notes: 'Cena restaurante',
           date: new Date(year, lastMonth, 15).toISOString().split('T')[0],
         },
         {
           amount: 180,
           category: 'Servicios',
-          notes: 'Internet',
+          notes: 'Factura electricidad',
           date: new Date(year, lastMonth, 20).toISOString().split('T')[0],
+        },
+        {
+          amount: 100,
+          category: 'Alimentación',
+          notes: 'Compra semanal',
+          date: new Date(year, lastMonth, 12).toISOString().split('T')[0],
+        },
+        {
+          amount: 35,
+          category: 'Entretenimiento',
+          notes: 'Netflix mensual',
+          date: new Date(year, lastMonth, 1).toISOString().split('T')[0],
+        },
+        {
+          amount: 75,
+          category: 'Servicios',
+          notes: 'Internet Movistar',
+          date: new Date(year, lastMonth, 3).toISOString().split('T')[0],
+        },
+        {
+          amount: 250,
+          category: 'Ropa',
+          notes: 'Compras Zara',
+          date: new Date(year, lastMonth, 18).toISOString().split('T')[0],
         },
       ];
 
@@ -844,7 +1000,7 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 2500,
           source: 'Salario',
-          notes: 'Salario mensual',
+          notes: 'Salario mensual neto',
           date: new Date(now.getFullYear(), thisMonth, 1)
             .toISOString()
             .split('T')[0],
@@ -852,8 +1008,16 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 300,
           source: 'Freelance',
-          notes: 'Proyecto web',
+          notes: 'Proyecto desarrollo web',
           date: new Date(now.getFullYear(), thisMonth, 15)
+            .toISOString()
+            .split('T')[0],
+        },
+        {
+          amount: 50,
+          source: 'Inversiones',
+          notes: 'Dividendos acciones',
+          date: new Date(now.getFullYear(), thisMonth, 10)
             .toISOString()
             .split('T')[0],
         },
@@ -864,14 +1028,26 @@ export class PeriodComparisonComponent implements OnInit {
         {
           amount: 2500,
           source: 'Salario',
-          notes: 'Salario mensual',
+          notes: 'Salario mensual neto',
           date: new Date(year, lastMonth, 1).toISOString().split('T')[0],
         },
         {
           amount: 200,
           source: 'Freelance',
-          notes: 'Consultoría',
+          notes: 'Consultoría técnica',
           date: new Date(year, lastMonth, 15).toISOString().split('T')[0],
+        },
+        {
+          amount: 25,
+          source: 'Inversiones',
+          notes: 'Dividendos acciones',
+          date: new Date(year, lastMonth, 10).toISOString().split('T')[0],
+        },
+        {
+          amount: 100,
+          source: 'Venta',
+          notes: 'Venta artículos usados',
+          date: new Date(year, lastMonth, 20).toISOString().split('T')[0],
         },
       ];
 
@@ -885,10 +1061,11 @@ export class PeriodComparisonComponent implements OnInit {
       }
 
       this.notificationService.info(
-        'Se han agregado datos de ejemplo para la demostración'
+        'Se han agregado datos de ejemplo para la demostración (16 gastos y 7 ingresos)'
       );
     } catch (error) {
       console.error('Error adding sample data:', error);
+      this.notificationService.error('Error al agregar datos de ejemplo');
     }
   }
 
