@@ -46,9 +46,9 @@ export interface ChartFilters {
       <div class="p-6">
         <!-- Filtro de fechas -->
         <div class="mb-6">
-          <h4 class="block text-sm font-semibold text-gray-700 mb-3"
-            >📅 Período de tiempo</h4
-          >
+          <h4 class="block text-sm font-semibold text-gray-700 mb-3">
+            📅 Período de tiempo
+          </h4>
           <div class="flex items-center gap-3 mb-3">
             <div class="flex-1">
               <label for="startDate" class="sr-only">Fecha de inicio</label>
@@ -90,9 +90,9 @@ export interface ChartFilters {
 
         <!-- Filtro de categorías -->
         <div class="mb-6" *ngIf="availableCategories.length > 0">
-          <h4 class="block text-sm font-semibold text-gray-700 mb-3"
-            >🏷️ Categorías</h4
-          >
+          <h4 class="block text-sm font-semibold text-gray-700 mb-3">
+            🏷️ Categorías
+          </h4>
           <div class="flex flex-col gap-2 max-h-[150px] overflow-y-auto">
             <label
               class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50 transition-colors"
@@ -112,9 +112,9 @@ export interface ChartFilters {
 
         <!-- Filtro de fuentes de ingreso -->
         <div class="mb-6" *ngIf="availableSources.length > 0">
-          <h4 class="block text-sm font-semibold text-gray-700 mb-3"
-            >💰 Fuentes de ingreso</h4
-          >
+          <h4 class="block text-sm font-semibold text-gray-700 mb-3">
+            💰 Fuentes de ingreso
+          </h4>
           <div class="flex flex-col gap-2 max-h-[150px] overflow-y-auto">
             <label
               class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50 transition-colors"
@@ -134,9 +134,9 @@ export interface ChartFilters {
 
         <!-- Filtro de montos -->
         <div class="mb-6">
-          <h4 class="block text-sm font-semibold text-gray-700 mb-3"
-            >💶 Rango de montos</h4
-          >
+          <h4 class="block text-sm font-semibold text-gray-700 mb-3">
+            💶 Rango de montos
+          </h4>
           <div class="flex gap-4">
             <div class="flex-1 flex flex-col gap-1">
               <label for="minAmount" class="text-xs font-medium text-gray-600"
