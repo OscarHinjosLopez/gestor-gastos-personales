@@ -3,11 +3,23 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StateService } from '../../core/state.service';
 import { Income } from '../../models/income.model';
+import {
+  ConfirmModalComponent,
+  ConfirmModalData,
+} from '../../shared/confirm-modal.component';
+import { EditIncomeModalComponent } from '../../shared/edit-income-modal.component';
 
 @Component({
   selector: 'app-income-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CurrencyPipe,
+    DatePipe,
+    ConfirmModalComponent,
+    EditIncomeModalComponent,
+  ],
   template: `
     <div class="bg-white rounded-lg border border-gray-200 p-6">
       <div class="flex justify-between items-center mb-6">
@@ -147,6 +159,21 @@ import { Income } from '../../models/income.model';
       </div>
       }
     </div>
+
+    <!-- Modals -->
+    <app-confirm-modal
+      [isOpen]="showDeleteModal"
+      [data]="deleteModalData"
+      (confirm)="confirmDelete()"
+      (cancel)="showDeleteModal = false"
+    ></app-confirm-modal>
+
+    <app-edit-income-modal
+      [isOpen]="showEditModal"
+      [income]="incomeToEdit"
+      (save)="saveIncome($event)"
+      (cancel)="showEditModal = false"
+    ></app-edit-income-modal>
   `,
 })
 export class IncomeListComponent {
@@ -154,6 +181,21 @@ export class IncomeListComponent {
   selectedSource = signal<string>('');
 
   public state = inject(StateService);
+
+  // Modal states
+  showDeleteModal = false;
+  showEditModal = false;
+  incomeToEdit: Income | null = null;
+  incomeToDelete: string | null = null;
+
+  deleteModalData: ConfirmModalData = {
+    title: 'Eliminar Ingreso',
+    message:
+      '¿Estás seguro de que deseas eliminar este ingreso? Esta acción no se puede deshacer.',
+    confirmText: 'Eliminar',
+    cancelText: 'Cancelar',
+    type: 'danger',
+  };
 
   filteredIncomes = computed(() => {
     let incomes = this.state.incomes();
@@ -191,14 +233,27 @@ export class IncomeListComponent {
   });
 
   async onDelete(id: string) {
-    if (confirm('¿Estás seguro de que quieres eliminar este ingreso?')) {
-      await this.state.deleteIncome(id);
+    this.incomeToDelete = id;
+    this.showDeleteModal = true;
+  }
+
+  async confirmDelete() {
+    if (this.incomeToDelete) {
+      await this.state.deleteIncome(this.incomeToDelete);
+      this.showDeleteModal = false;
+      this.incomeToDelete = null;
     }
   }
 
   onEdit(income: Income) {
-    // TODO: Implementar edición inline o modal
-    console.log('Editar ingreso:', income);
+    this.incomeToEdit = income;
+    this.showEditModal = true;
+  }
+
+  async saveIncome(income: Income) {
+    await this.state.updateIncome(income);
+    this.showEditModal = false;
+    this.incomeToEdit = null;
   }
 
   clearFilters() {

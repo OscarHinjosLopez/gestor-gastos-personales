@@ -1,12 +1,40 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { ExpenseListComponent } from './components/expense-list/expense-list.component';
-import { IncomeListComponent } from './components/income-list/income-list.component';
-import { StatsComponent } from './components/stats/stats.component';
 
 export const routes: Routes = [
-  { path: '', component: DashboardComponent },
-  { path: 'expenses', component: ExpenseListComponent },
-  { path: 'incomes', component: IncomeListComponent },
-  { path: 'stats', component: StatsComponent },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./components/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent
+      ),
+  },
+  {
+    path: 'expenses',
+    loadComponent: () =>
+      import('./components/expense-list/expense-list.component').then(
+        (m) => m.ExpenseListComponent
+      ),
+  },
+  {
+    path: 'incomes',
+    loadComponent: () =>
+      import('./components/income-list/income-list.component').then(
+        (m) => m.IncomeListComponent
+      ),
+  },
+  {
+    path: 'stats',
+    loadComponent: () =>
+      import('./components/stats/stats.component').then(
+        (m) => m.StatsComponent
+      ),
+  },
+  {
+    path: 'comparison',
+    loadComponent: () =>
+      import('./components/period-comparison/period-comparison.component').then(
+        (m) => m.PeriodComparisonComponent
+      ),
+  },
+  { path: '**', redirectTo: '' },
 ];

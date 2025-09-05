@@ -3,11 +3,23 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StateService } from '../../core/state.service';
 import { Expense } from '../../models/expense.model';
+import {
+  ConfirmModalComponent,
+  ConfirmModalData,
+} from '../../shared/confirm-modal.component';
+import { EditExpenseModalComponent } from '../../shared/edit-expense-modal.component';
 
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CurrencyPipe,
+    DatePipe,
+    ConfirmModalComponent,
+    EditExpenseModalComponent,
+  ],
   template: `
     <div class="bg-white rounded-lg border border-gray-200 p-6">
       <div class="flex justify-between items-center mb-6">
@@ -145,6 +157,21 @@ import { Expense } from '../../models/expense.model';
       </div>
       }
     </div>
+
+    <!-- Modals -->
+    <app-confirm-modal
+      [isOpen]="showDeleteModal"
+      [data]="deleteModalData"
+      (confirm)="confirmDelete()"
+      (cancel)="showDeleteModal = false"
+    ></app-confirm-modal>
+
+    <app-edit-expense-modal
+      [isOpen]="showEditModal"
+      [expense]="expenseToEdit"
+      (save)="saveExpense($event)"
+      (cancel)="showEditModal = false"
+    ></app-edit-expense-modal>
   `,
 })
 export class ExpenseListComponent {
@@ -152,6 +179,21 @@ export class ExpenseListComponent {
   selectedCategory = signal<string>('');
 
   public state = inject(StateService);
+
+  // Modal states
+  showDeleteModal = false;
+  showEditModal = false;
+  expenseToEdit: Expense | null = null;
+  expenseToDelete: string | null = null;
+
+  deleteModalData: ConfirmModalData = {
+    title: 'Eliminar Gasto',
+    message:
+      '¿Estás seguro de que deseas eliminar este gasto? Esta acción no se puede deshacer.',
+    confirmText: 'Eliminar',
+    cancelText: 'Cancelar',
+    type: 'danger',
+  };
 
   filteredExpenses = computed(() => {
     let expenses = this.state.expenses();
@@ -189,14 +231,27 @@ export class ExpenseListComponent {
   });
 
   async onDelete(id: string) {
-    if (confirm('¿Estás seguro de que quieres eliminar este gasto?')) {
-      await this.state.deleteExpense(id);
+    this.expenseToDelete = id;
+    this.showDeleteModal = true;
+  }
+
+  async confirmDelete() {
+    if (this.expenseToDelete) {
+      await this.state.deleteExpense(this.expenseToDelete);
+      this.showDeleteModal = false;
+      this.expenseToDelete = null;
     }
   }
 
   onEdit(expense: Expense) {
-    // TODO: Implementar edición inline o modal
-    console.log('Editar gasto:', expense);
+    this.expenseToEdit = expense;
+    this.showEditModal = true;
+  }
+
+  async saveExpense(expense: Expense) {
+    await this.state.updateExpense(expense);
+    this.showEditModal = false;
+    this.expenseToEdit = null;
   }
 
   clearFilters() {
