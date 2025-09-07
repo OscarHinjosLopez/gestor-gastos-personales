@@ -44,7 +44,7 @@ export class StateService {
       this._expenses.set(exps || []);
       this._incomes.set(incs || []);
 
-      this.notificationService.success('Datos cargados correctamente');
+      // Removed notification for data loading - not critical
     } catch (error) {
       const errorMessage = 'Error al cargar los datos';
       this._error.set(errorMessage);

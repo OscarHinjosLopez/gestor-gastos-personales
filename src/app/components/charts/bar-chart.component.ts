@@ -8,8 +8,9 @@ import {
   AfterViewInit,
   OnChanges,
   inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NgChartsModule, BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { ChartService } from '../../core/chart.service';
@@ -32,7 +33,7 @@ export interface BarChartDataset {
       class="relative w-full flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden"
       [style.height.px]="height"
     >
-      @if (chartData && chartData.labels && chartData.labels.length > 0) {
+      @if (isBrowser && chartData && chartData.labels && chartData.labels.length > 0) {
       <div class="px-6 py-4 border-b border-gray-100" *ngIf="title">
         <h4 class="text-lg font-semibold text-gray-900 m-0">{{ title }}</h4>
       </div>
@@ -81,9 +82,15 @@ export class BarChartComponent
 
   chartData?: ChartData<'bar'>;
   chartOptions?: ChartConfiguration<'bar'>['options'];
+  isBrowser: boolean;
 
   private resizeObserver?: ResizeObserver;
   private chartService = inject(ChartService);
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
     this.updateChart();

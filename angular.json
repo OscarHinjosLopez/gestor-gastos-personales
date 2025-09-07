@@ -62,6 +62,13 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "no-ssr": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "ssr": false,
+              "prerender": false
             }
           },
           "defaultConfiguration": "production"
@@ -74,6 +81,9 @@
             },
             "development": {
               "buildTarget": "gestor-gastos-personales:build:development"
+            },
+            "no-ssr": {
+              "buildTarget": "gestor-gastos-personales:build:no-ssr"
             }
           },
           "defaultConfiguration": "development"

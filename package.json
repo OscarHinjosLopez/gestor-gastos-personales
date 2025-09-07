@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --configuration=no-ssr",
+    "start:ssr": "ng serve",
     "build": "ng build",
     "build:css": "tailwindcss -i ./src/styles.scss -o ./src/tailwind-output.css",
     "watch": "ng build --watch --configuration development",

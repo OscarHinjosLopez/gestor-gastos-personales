@@ -24,7 +24,7 @@ export class NotificationService {
       ...config,
       id: this.generateId(),
       timestamp: new Date(),
-      duration: config.duration ?? 5000,
+      duration: config.duration ?? 3000,
     };
 
     this._notifications.update((notifications) => [
@@ -53,7 +53,7 @@ export class NotificationService {
   }
 
   success(message: string, duration?: number): string {
-    return this.show({ message, type: 'success', duration });
+    return this.show({ message, type: 'success', duration: duration ?? 2000 });
   }
 
   error(message: string, duration?: number): string {

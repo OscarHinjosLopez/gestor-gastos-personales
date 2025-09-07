@@ -14,7 +14,7 @@ import { LoadingService } from '../../core/loading.service';
 import { NotificationService } from '../../core/notification.service';
 import { ExportService } from '../../core/export.service';
 import { StateService } from '../../core/state.service';
-import { BasicChartComponent } from '../charts/basic-chart.component';
+import { TestChartComponent } from '../charts/test-chart.component';
 import { ComparisonFiltersComponent } from './comparison-filters.component';
 import { TrendAnalysisComponent } from './trend-analysis.component';
 import {
@@ -34,7 +34,7 @@ import {
     CommonModule,
     FormsModule,
     CurrencyPipe,
-    BasicChartComponent,
+    TestChartComponent,
     ComparisonFiltersComponent,
     TrendAnalysisComponent,
   ],
@@ -445,42 +445,45 @@ import {
         <!-- Balance and Income Comparison - Side by side -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Balance Comparison Chart -->
-          <app-basic-chart
+          <app-test-chart
             [title]="'Comparación de Balance'"
             [icon]="'💰'"
-            [value1]="50"
-            [value2]="1038"
-            [label1]="'Últimos 30 días'"
-            [label2]="'Anteriores 30 días'"
+            [value1]="getBalanceValue1()"
+            [value2]="getBalanceValue2()"
+            [label1]="getPeriod1Label()"
+            [label2]="getPeriod2Label()"
             [color]="'#10B981'"
             [showSummary]="true"
-          ></app-basic-chart>
+            [chartId]="'balance-chart'"
+          ></app-test-chart>
 
           <!-- Income Comparison Chart -->
-          <app-basic-chart
+          <app-test-chart
             [title]="'Comparación de Ingresos'"
             [icon]="'📈'"
-            [value1]="1245"
-            [value2]="4205"
-            [label1]="'Últimos 30 días'"
-            [label2]="'Anteriores 30 días'"
+            [value1]="getIncomeValue1()"
+            [value2]="getIncomeValue2()"
+            [label1]="getPeriod1Label()"
+            [label2]="getPeriod2Label()"
             [color]="'#3B82F6'"
             [showSummary]="true"
-          ></app-basic-chart>
+            [chartId]="'income-chart'"
+          ></app-test-chart>
         </div>
 
         <!-- Expense Comparison Chart - Full width -->
         <div class="w-full">
-          <app-basic-chart
+          <app-test-chart
             [title]="'Comparación de Gastos'"
             [icon]="'📉'"
-            [value1]="1195"
-            [value2]="3167"
-            [label1]="'Últimos 30 días'"
-            [label2]="'Anteriores 30 días'"
+            [value1]="getExpenseValue1()"
+            [value2]="getExpenseValue2()"
+            [label1]="getPeriod1Label()"
+            [label2]="getPeriod2Label()"
             [color]="'#EF4444'"
             [showSummary]="true"
-          ></app-basic-chart>
+            [chartId]="'expense-chart'"
+          ></app-test-chart>
         </div>
       </div>
 
@@ -832,7 +835,7 @@ export class PeriodComparisonComponent implements OnInit {
         await this.selectPreset(defaultPreset);
       }
       
-      this.notificationService.success('Datos recargados correctamente');
+      // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error('Error al recargar los datos');
       console.error('Error reloading data:', error);
@@ -1078,9 +1081,7 @@ export class PeriodComparisonComponent implements OnInit {
         periods.period1,
         periods.period2
       );
-      this.notificationService.success(
-        `Comparación "${preset.label}" generada correctamente`
-      );
+      // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error('Error al generar la comparación');
       console.error('Error comparing periods:', error);
@@ -1097,9 +1098,7 @@ export class PeriodComparisonComponent implements OnInit {
         this.customPeriod1(),
         this.customPeriod2()
       );
-      this.notificationService.success(
-        'Comparación personalizada generada correctamente'
-      );
+      // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error(
         'Error al generar la comparación personalizada'
@@ -1120,7 +1119,7 @@ export class PeriodComparisonComponent implements OnInit {
           comparison.period2.range,
           filters
         );
-        this.notificationService.success('Filtros aplicados correctamente');
+        // Removed success notification - not critical
       }
     } catch (error) {
       this.notificationService.error('Error al aplicar los filtros');
@@ -1240,7 +1239,7 @@ export class PeriodComparisonComponent implements OnInit {
 
     try {
       this.exportService.exportComparisonToCSV(comparison);
-      this.notificationService.success('Datos exportados a CSV correctamente');
+      // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error('Error al exportar a CSV');
       console.error('Export CSV error:', error);
@@ -1258,7 +1257,7 @@ export class PeriodComparisonComponent implements OnInit {
 
     try {
       this.exportService.exportComparisonToPDF(comparison);
-      this.notificationService.success('Informe PDF generado correctamente');
+      // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error('Error al generar PDF');
       console.error('Export PDF error:', error);
@@ -1285,5 +1284,38 @@ export class PeriodComparisonComponent implements OnInit {
       this.notificationService.error('Error al copiar al portapapeles');
       console.error('Copy to clipboard error:', error);
     }
+  }
+
+  // Helper methods for chart data binding
+  getBalanceValue1(): number {
+    return this.currentComparison()?.period1?.data?.balance || 0;
+  }
+
+  getBalanceValue2(): number {
+    return this.currentComparison()?.period2?.data?.balance || 0;
+  }
+
+  getIncomeValue1(): number {
+    return this.currentComparison()?.period1?.data?.totalIncomes || 0;
+  }
+
+  getIncomeValue2(): number {
+    return this.currentComparison()?.period2?.data?.totalIncomes || 0;
+  }
+
+  getExpenseValue1(): number {
+    return this.currentComparison()?.period1?.data?.totalExpenses || 0;
+  }
+
+  getExpenseValue2(): number {
+    return this.currentComparison()?.period2?.data?.totalExpenses || 0;
+  }
+
+  getPeriod1Label(): string {
+    return this.currentComparison()?.period1?.range?.label || 'Período Anterior';
+  }
+
+  getPeriod2Label(): string {
+    return this.currentComparison()?.period2?.range?.label || 'Período Actual';
   }
 }
