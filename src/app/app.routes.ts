@@ -36,5 +36,12 @@ export const routes: Routes = [
         (m) => m.PeriodComparisonComponent
       ),
   },
+  {
+    path: 'projections',
+    loadComponent: () =>
+      import('./components/projections/projections.component').then(
+        (m) => m.ProjectionsComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -1,4 +1,16 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, AfterViewInit, inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  Input,
+  ViewChild,
+  ElementRef,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  AfterViewInit,
+  inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import { PeriodComparison } from '../../models/period-comparison.model';
@@ -12,74 +24,96 @@ Chart.register(...registerables);
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       @if (title) {
-        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          @if (icon) {
-            <span class="text-xl">{{ icon }}</span>
-          }
-          {{ title }}
-        </h3>
-      }
-
-      @if (comparison) {
-        <div class="relative">
-          @if (isBrowser) {
-            <div class="w-full h-80">
-              <canvas #chartCanvas></canvas>
-            </div>
-          } @else {
-            <div class="flex items-center justify-center w-full h-80 bg-gray-50 rounded-lg">
-              <div class="text-center text-gray-500">
-                <div class="text-4xl mb-2">📊</div>
-                <p>Cargando gráfico...</p>
-              </div>
-            </div>
-          }
-
-          @if (showSummary && dataType !== 'categories' && dataType !== 'sources') {
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">{{ getPeriod1Label() }}</div>
-                <div class="text-lg font-semibold text-gray-800">{{ getPeriod1Value() | currency:'EUR':'symbol':'1.0-0' }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">{{ getPeriod2Label() }}</div>
-                <div class="text-lg font-semibold text-gray-800">{{ getPeriod2Value() | currency:'EUR':'symbol':'1.0-0' }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">Cambio</div>
-                <div class="text-lg font-semibold" [class]="getDeltaClass()">
-                  {{ getDeltaPercentage() > 0 ? '+' : '' }}{{ getDeltaPercentage() | number:'1.1-1' }}%
-                </div>
-              </div>
-            </div>
-          }
+      <h3
+        class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2"
+      >
+        @if (icon) {
+        <span class="text-xl">{{ icon }}</span>
+        }
+        {{ title }}
+      </h3>
+      } @if (comparison) {
+      <div class="relative">
+        @if (isBrowser) {
+        <div class="w-full h-80">
+          <canvas #chartCanvas></canvas>
         </div>
+        } @else {
+        <div
+          class="flex items-center justify-center w-full h-80 bg-gray-50 rounded-lg"
+        >
+          <div class="text-center text-gray-500">
+            <div class="text-4xl mb-2">📊</div>
+            <p>Cargando gráfico...</p>
+          </div>
+        </div>
+        } @if (showSummary && dataType !== 'categories' && dataType !==
+        'sources') {
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              {{ getPeriod1Label() }}
+            </div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ getPeriod1Value() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              {{ getPeriod2Label() }}
+            </div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ getPeriod2Value() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              Cambio
+            </div>
+            <div class="text-lg font-semibold" [class]="getDeltaClass()">
+              {{ getDeltaPercentage() > 0 ? '+' : ''
+              }}{{ getDeltaPercentage() | number : '1.1-1' }}%
+            </div>
+          </div>
+        </div>
+        }
+      </div>
       } @else {
-        <div class="text-center py-12">
-          <div class="text-4xl text-gray-300 mb-2">📊</div>
-          <p class="text-gray-500">{{ noDataMessage || 'No hay datos para mostrar' }}</p>
-          <button 
-            (click)="debugChart()"
-            class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Debug Chart
-          </button>
-        </div>
+      <div class="text-center py-12">
+        <div class="text-4xl text-gray-300 mb-2">📊</div>
+        <p class="text-gray-500">
+          {{ noDataMessage || 'No hay datos para mostrar' }}
+        </p>
+        <button
+          (click)="debugChart()"
+          class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Debug Chart
+        </button>
+      </div>
       }
     </div>
-  `
+  `,
 })
-export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class SimpleComparisonChartComponent
+  implements AfterViewInit, OnDestroy, OnChanges
+{
   @Input() comparison: PeriodComparison | null = null;
   @Input() chartType: 'bar' | 'line' | 'doughnut' = 'bar';
   @Input() title: string = '';
   @Input() icon: string = '';
   @Input() showSummary: boolean = true;
-  @Input() dataType: 'balance' | 'income' | 'expense' | 'categories' | 'sources' = 'balance';
+  @Input() dataType:
+    | 'balance'
+    | 'income'
+    | 'expense'
+    | 'categories'
+    | 'sources' = 'balance';
   @Input() maxCategories: number = 5;
   @Input() noDataMessage: string = '';
 
-  @ViewChild('chartCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartCanvas', { static: true })
+  canvasRef!: ElementRef<HTMLCanvasElement>;
 
   private chart: Chart | null = null;
   isBrowser: boolean;
@@ -117,7 +151,7 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
       hasComparison: !!this.comparison,
       hasCanvas: !!this.canvasRef,
       dataType: this.dataType,
-      comparison: this.comparison
+      comparison: this.comparison,
     });
   }
 
@@ -150,20 +184,24 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: this.dataType === 'categories' || this.dataType === 'sources'
-            }
+              display:
+                this.dataType === 'categories' || this.dataType === 'sources',
+            },
           },
-          scales: this.chartType === 'bar' ? {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return '€' + value;
+          scales:
+            this.chartType === 'bar'
+              ? {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function (value) {
+                        return '€' + value;
+                      },
+                    },
+                  },
                 }
-              }
-            }
-          } : undefined
-        }
+              : undefined,
+        },
       });
 
       console.log('✅ Chart created successfully');
@@ -214,14 +252,16 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
 
     return {
       labels,
-      datasets: [{
-        label,
-        data: values,
-        backgroundColor: [color + '80', color + '60'],
-        borderColor: [color, color],
-        borderWidth: 2,
-        borderRadius: 8,
-      }]
+      datasets: [
+        {
+          label,
+          data: values,
+          backgroundColor: [color + '80', color + '60'],
+          borderColor: [color, color],
+          borderWidth: 2,
+          borderRadius: 8,
+        },
+      ],
     };
   }
 
@@ -230,13 +270,13 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
 
     const changes = this.comparison.metrics.categoryChanges
       .slice(0, this.maxCategories)
-      .filter(c => c.period1Amount > 0 || c.period2Amount > 0);
+      .filter((c) => c.period1Amount > 0 || c.period2Amount > 0);
 
     console.log('📊 Category changes:', changes);
 
-    const labels = changes.map(c => c.name);
-    const period1Data = changes.map(c => c.period1Amount);
-    const period2Data = changes.map(c => c.period2Amount);
+    const labels = changes.map((c) => c.name);
+    const period1Data = changes.map((c) => c.period1Amount);
+    const period2Data = changes.map((c) => c.period2Amount);
 
     return {
       labels,
@@ -256,8 +296,8 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
           borderColor: '#8B5CF6',
           borderWidth: 2,
           borderRadius: 8,
-        }
-      ]
+        },
+      ],
     };
   }
 
@@ -266,13 +306,13 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
 
     const changes = this.comparison.metrics.sourceChanges
       .slice(0, this.maxCategories)
-      .filter(c => c.period1Amount > 0 || c.period2Amount > 0);
+      .filter((c) => c.period1Amount > 0 || c.period2Amount > 0);
 
     console.log('📊 Source changes:', changes);
 
-    const labels = changes.map(c => c.name);
-    const period1Data = changes.map(c => c.period1Amount);
-    const period2Data = changes.map(c => c.period2Amount);
+    const labels = changes.map((c) => c.name);
+    const period1Data = changes.map((c) => c.period1Amount);
+    const period2Data = changes.map((c) => c.period2Amount);
 
     return {
       labels,
@@ -292,8 +332,8 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
           borderColor: '#F59E0B',
           borderWidth: 2,
           borderRadius: 8,
-        }
-      ]
+        },
+      ],
     };
   }
 
@@ -309,30 +349,42 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
   getPeriod1Value(): number {
     if (!this.comparison) return 0;
     switch (this.dataType) {
-      case 'balance': return this.comparison.period1.data.balance;
-      case 'income': return this.comparison.period1.data.totalIncomes;
-      case 'expense': return this.comparison.period1.data.totalExpenses;
-      default: return 0;
+      case 'balance':
+        return this.comparison.period1.data.balance;
+      case 'income':
+        return this.comparison.period1.data.totalIncomes;
+      case 'expense':
+        return this.comparison.period1.data.totalExpenses;
+      default:
+        return 0;
     }
   }
 
   getPeriod2Value(): number {
     if (!this.comparison) return 0;
     switch (this.dataType) {
-      case 'balance': return this.comparison.period2.data.balance;
-      case 'income': return this.comparison.period2.data.totalIncomes;
-      case 'expense': return this.comparison.period2.data.totalExpenses;
-      default: return 0;
+      case 'balance':
+        return this.comparison.period2.data.balance;
+      case 'income':
+        return this.comparison.period2.data.totalIncomes;
+      case 'expense':
+        return this.comparison.period2.data.totalExpenses;
+      default:
+        return 0;
     }
   }
 
   getDeltaPercentage(): number {
     if (!this.comparison) return 0;
     switch (this.dataType) {
-      case 'balance': return this.comparison.metrics.balanceDelta.percentage;
-      case 'income': return this.comparison.metrics.incomeDelta.percentage;
-      case 'expense': return this.comparison.metrics.expenseDelta.percentage;
-      default: return 0;
+      case 'balance':
+        return this.comparison.metrics.balanceDelta.percentage;
+      case 'income':
+        return this.comparison.metrics.incomeDelta.percentage;
+      case 'expense':
+        return this.comparison.metrics.expenseDelta.percentage;
+      default:
+        return 0;
     }
   }
 

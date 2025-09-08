@@ -1,6 +1,6 @@
 # 💰 Gestor de Gastos Personales
 
-Una aplicación web moderna y completa para la gestión inteligente de finanzas personales, desarrollada con Angular 18, TypeScript y Tailwind CSS.
+Una aplicación web moderna y completa para la gestión inteligente de finanzas personales, desarrollada con Angular 18, TypeScript y Tailwind CSS. Incluye **proyecciones de gastos** basadas en inteligencia artificial para planificación financiera avanzada.
 
 ## 🌟 Características Principales
 
@@ -37,12 +37,28 @@ Una aplicación web moderna y completa para la gestión inteligente de finanzas 
 - 🎯 **Estados claramente diferenciados** (selección → carga → resultados)
 - 🖱️ **Navegación mejorada** con botón "cambiar períodos"
 
+### 🔮 Proyecciones de Gastos (NUEVO)
+- 🤖 **5 Algoritmos de IA** para proyecciones precisas:
+  - **Promedio Histórico**: Basado en gastos pasados
+  - **Análisis de Tendencias**: Detecta patrones de crecimiento/decrecimiento
+  - **Ajuste Estacional**: Considera variaciones por época del año
+  - **Híbrido (Recomendado)**: Combina múltiples algoritmos
+  - **Manual**: Permite ajustes personalizados
+- 📊 **Métricas de Confianza** (0-100%) para evaluar precisión
+- 📈 **Proyecciones por Categoría** con desglose detallado
+- ⚠️ **Sistema de Alertas** para proyecciones con baja confianza
+- 💡 **Recomendaciones Inteligentes** para mejorar planificación
+- ⚙️ **Configuración Avanzada** personalizable
+- 📅 **Períodos Flexibles** (1-24 meses de proyección)
+- 🎯 **Comparación Histórica** vs proyectado
+
 ### 🎨 Experiencia de Usuario
 - 🎨 **Diseño moderno** con Tailwind CSS
 - 📱 **Completamente responsive** para móvil, tablet y desktop
 - 🌙 **Iconos intuitivos** para todas las funciones
 - ⚡ **Transiciones suaves** y animaciones
 - ♿ **Accesibilidad** con soporte para screen readers
+- 🗑️ **Modales de confirmación** elegantes para acciones destructivas
 
 ### 🔔 Sistema de Notificaciones
 - 🎯 **Notificaciones optimizadas** (reducidas de ~20 a ~8-10 por sesión)
@@ -77,18 +93,28 @@ src/app/
 │   ├── income-form/     # Formulario de ingresos
 │   ├── income-list/     # Lista de ingresos
 │   ├── period-comparison/ # Comparación de períodos
+│   ├── projections/     # Proyecciones de gastos (NUEVO)
+│   │   ├── projections.component.ts # Componente principal
+│   │   └── projection-settings.component.ts # Configuraciones
 │   ├── stats/          # Estadísticas y gráficos
 │   └── charts/         # Componentes de gráficos
 ├── core/               # Servicios principales
 │   ├── state.service.ts      # Estado global
 │   ├── notification.service.ts # Notificaciones
 │   ├── chart.service.ts      # Gráficos
+│   ├── projection.service.ts # Proyecciones (NUEVO)
 │   ├── export.service.ts     # Exportación
 │   ├── loading.service.ts    # Estados de carga
 │   ├── storage.service.ts    # Almacenamiento
 │   └── pwa.service.ts        # PWA features
 ├── models/             # Interfaces y tipos
+│   ├── expense.model.ts
+│   ├── income.model.ts
+│   └── projection.model.ts   # Modelos de proyección (NUEVO)
 ├── shared/             # Componentes compartidos
+│   ├── confirm-modal.component.ts # Modal de confirmación
+│   ├── projection-validation.utils.ts # Validaciones (NUEVO)
+│   └── ... # Otros componentes compartidos
 └── utils/              # Utilidades
 ```
 
@@ -98,6 +124,15 @@ src/app/
 - **Gestión centralizada** del estado de la aplicación
 - **Signals reactivos** para cambios en tiempo real
 - **CRUD operations** para gastos e ingresos
+- **Cálculos automáticos** de balance y métricas
+
+#### ProjectionService (NUEVO)
+- **5 Algoritmos de IA** para proyecciones inteligentes
+- **Análisis de tendencias** con regresión lineal
+- **Ajustes estacionales** automáticos
+- **Cálculo de confianza** basado en variabilidad
+- **Configuraciones personalizables** por usuario
+- **Validación con Zod** para integridad de datos
 - **Cálculos automáticos** de balance y métricas
 
 #### ChartService  
@@ -200,6 +235,26 @@ npm run lint       # Linter de código
 - **Compara métricas** entre diferentes períodos
 - **Visualiza cambios** con gráficos y porcentajes
 
+### 6. Proyecciones de Gastos (NUEVO)
+- Ve a la pestaña **"📈 Proyecciones"**
+- **Crea nuevas proyecciones** con diferentes algoritmos:
+  - **Promedio Histórico**: Para gastos estables
+  - **Tendencias**: Para detectar cambios progresivos  
+  - **Estacional**: Para gastos que varían por época
+  - **Híbrido**: Combina múltiples factores (recomendado)
+- **Configura parámetros avanzados**:
+  - Período base (3-24 meses de historial)
+  - Umbrales de confianza personalizados
+  - Habilitación de análisis estacionales
+- **Analiza resultados detallados**:
+  - Gráficos de distribución por categorías
+  - Métricas de confianza y advertencias
+  - Recomendaciones para mejorar precisión
+- **Gestiona proyecciones**:
+  - Activa/desactiva proyecciones según necesidad
+  - Elimina proyecciones obsoletas con confirmación
+  - Exporta resultados para planificación externa
+
 ## 🎨 Paleta de Colores
 
 ### Estados Financieros
@@ -208,6 +263,12 @@ npm run lint       # Linter de código
 - **Ingresos**: Verde (#10B981)
 - **Gastos**: Rojo (#EF4444)
 - **Ahorro**: Azul (#3B82F6)
+
+### Proyecciones y Confianza
+- **Alta Confianza (80%+)**: Verde (#10B981)
+- **Confianza Media (60-79%)**: Amarillo (#F59E0B)
+- **Baja Confianza (<60%)**: Rojo (#EF4444)
+- **Proyecciones**: Naranja (#F97316)
 
 ### UI Elements
 - **Primario**: Púrpura (#7C3AED)
@@ -224,12 +285,14 @@ npm run lint       # Linter de código
 - **Sin envío de datos** a servidores externos
 - **Privacidad total** - tus datos permanecen en tu dispositivo
 - **Exportación/importación** para respaldos
+- **Proyecciones persistentes** con configuraciones personalizadas
 
 ### Validación de Datos
 - **Validación client-side** con Zod schemas
-- **Sanitización** de inputs
+- **Sanitización** de inputs para gastos, ingresos y proyecciones
 - **Type safety** con TypeScript
 - **Manejo de errores** robusto
+- **Validación de rangos** para fechas y montos en proyecciones
 
 ## 📊 Métricas del Proyecto
 
@@ -289,8 +352,77 @@ Este proyecto está licenciado bajo la licencia MIT. Ver el archivo `LICENSE` pa
 - **Tailwind CSS** por el sistema de diseño
 - **Community** por feedback y sugerencias
 
+## 🔮 Algoritmos de Proyección
+
+### 1. Promedio Histórico
+```typescript
+proyecciónMensual = totalGastos / númeroMeses
+proyecciónTotal = proyecciónMensual × mesesFuturos
+```
+**Ideal para**: Gastos estables sin variaciones significativas
+
+### 2. Análisis de Tendencias
+```typescript
+// Regresión lineal simple
+tendencia = (n × ΣXY - ΣX × ΣY) / (n × ΣX² - (ΣX)²)
+proyecciónAjustada = baseAmount + (tendencia × tiempoFuturo)
+```
+**Ideal para**: Detectar patrones de crecimiento o decrecimiento
+
+### 3. Ajustes Estacionales
+```typescript
+multiplicadores = [1.1, 0.9, 1.0, 1.0, 1.0, 1.0, 1.1, 1.0, 1.0, 1.0, 1.2, 1.3]
+// Enero y julio: +10%, febrero: -10%, noviembre: +20%, diciembre: +30%
+proyecciónEstacional = proyecciónBase × multiplicadorMes
+```
+**Ideal para**: Gastos que varían según la época del año
+
+### 4. Híbrido (Recomendado)
+```typescript
+resultado = aplicarTendencia(aplicarEstacionalidad(promedioHistórico))
+confianza = confianzaBase × factorCombinado
+```
+**Ideal para**: Máxima precisión combinando múltiples factores
+
+### 5. Manual
+Permite ajustes personalizados sobre cualquier base calculada.
+**Ideal para**: Situaciones específicas o cambios de vida planificados
+
+### Cálculo de Confianza
+```typescript
+coeficienteVariación = desviacionEstandar / media
+confianza = Math.max(0, 100 - (coeficienteVariación × 100))
+```
+
+## 🎯 Casos de Uso para Proyecciones
+
+### 📅 Planificación Mensual
+- **Algoritmo recomendado**: Promedio Histórico
+- **Período**: 1-3 meses
+- **Uso**: Presupuesto mensual, gastos recurrentes
+
+### 🎯 Planificación Anual  
+- **Algoritmo recomendado**: Híbrido
+- **Período**: 6-12 meses
+- **Uso**: Objetivos anuales, planificación de ahorros
+
+### 🔍 Análisis de Tendencias
+- **Algoritmo recomendado**: Basado en Tendencias
+- **Período**: 3-6 meses
+- **Uso**: Identificar cambios en patrones de gasto
+
+### 🎄 Gastos Estacionales
+- **Algoritmo recomendado**: Estacional o Híbrido
+- **Período**: 12 meses
+- **Uso**: Planificar gastos de navidad, vacaciones, etc.
+
+### ⚠️ Detección de Anomalías
+- **Métrica clave**: Nivel de confianza
+- **Umbral**: < 70% genera alertas
+- **Uso**: Identificar cambios significativos en patrones
+
 ---
 
 **Estado del Proyecto**: ✅ **Producción Ready** (Septiembre 2025)
 
-*Una herramienta moderna para tomar control de tus finanzas personales* 💰
+*Una herramienta moderna para tomar control de tus finanzas personales con proyecciones inteligentes* 💰📈

@@ -9,7 +9,9 @@ import { PeriodComparison } from '../../models/period-comparison.model';
   template: `
     @if (comparison) {
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+      <h3
+        class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2"
+      >
         <span class="text-xl">📊</span>
         Análisis de Tendencias
       </h3>
@@ -25,20 +27,25 @@ import { PeriodComparison } from '../../models/period-comparison.model';
             <div class="flex justify-between">
               <span class="text-sm text-blue-700">Período 1:</span>
               <span class="font-medium text-blue-800">
-                {{ getDailyExpenseP1() | currency:'EUR':'symbol':'1.0-0' }}/día
+                {{
+                  getDailyExpenseP1() | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}/día
               </span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-blue-700">Período 2:</span>
               <span class="font-medium text-blue-800">
-                {{ getDailyExpenseP2() | currency:'EUR':'symbol':'1.0-0' }}/día
+                {{
+                  getDailyExpenseP2() | currency : 'EUR' : 'symbol' : '1.0-0'
+                }}/día
               </span>
             </div>
             <div class="border-t border-blue-200 pt-2">
               <div class="flex justify-between items-center">
                 <span class="text-sm text-blue-700">Cambio:</span>
                 <span [class]="getChangeClass(getVelocityChange())">
-                  {{ getVelocityChange() > 0 ? '+' : '' }}{{ getVelocityChange() | number:'1.1-1' }}%
+                  {{ getVelocityChange() > 0 ? '+' : ''
+                  }}{{ getVelocityChange() | number : '1.1-1' }}%
                 </span>
               </div>
             </div>
@@ -46,7 +53,9 @@ import { PeriodComparison } from '../../models/period-comparison.model';
         </div>
 
         <!-- Efficiency Analysis -->
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+        <div
+          class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4"
+        >
           <h4 class="font-medium text-green-800 mb-3 flex items-center gap-2">
             <span>🎯</span>
             Eficiencia Financiera
@@ -55,20 +64,21 @@ import { PeriodComparison } from '../../models/period-comparison.model';
             <div class="flex justify-between">
               <span class="text-sm text-green-700">Gasto/Ingreso P1:</span>
               <span class="font-medium text-green-800">
-                {{ getEfficiencyP1() | number:'1.1-1' }}%
+                {{ getEfficiencyP1() | number : '1.1-1' }}%
               </span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-green-700">Gasto/Ingreso P2:</span>
               <span class="font-medium text-green-800">
-                {{ getEfficiencyP2() | number:'1.1-1' }}%
+                {{ getEfficiencyP2() | number : '1.1-1' }}%
               </span>
             </div>
             <div class="border-t border-green-200 pt-2">
               <div class="flex justify-between items-center">
                 <span class="text-sm text-green-700">Mejora:</span>
                 <span [class]="getChangeClass(getEfficiencyChange(), true)">
-                  {{ getEfficiencyChange() > 0 ? '+' : '' }}{{ getEfficiencyChange() | number:'1.1-1' }}pp
+                  {{ getEfficiencyChange() > 0 ? '+' : ''
+                  }}{{ getEfficiencyChange() | number : '1.1-1' }}pp
                 </span>
               </div>
             </div>
@@ -76,19 +86,29 @@ import { PeriodComparison } from '../../models/period-comparison.model';
         </div>
 
         <!-- Volatility Analysis -->
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+        <div
+          class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4"
+        >
           <h4 class="font-medium text-purple-800 mb-3 flex items-center gap-2">
             <span>📈</span>
             Estabilidad
           </h4>
           <div class="space-y-2">
             <div class="flex justify-between">
-              <span class="text-sm text-purple-700">Categorías activas P1:</span>
-              <span class="font-medium text-purple-800">{{ getCategoriesP1() }}</span>
+              <span class="text-sm text-purple-700"
+                >Categorías activas P1:</span
+              >
+              <span class="font-medium text-purple-800">{{
+                getCategoriesP1()
+              }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-sm text-purple-700">Categorías activas P2:</span>
-              <span class="font-medium text-purple-800">{{ getCategoriesP2() }}</span>
+              <span class="text-sm text-purple-700"
+                >Categorías activas P2:</span
+              >
+              <span class="font-medium text-purple-800">{{
+                getCategoriesP2()
+              }}</span>
             </div>
             <div class="border-t border-purple-200 pt-2">
               <div class="flex justify-between items-center">
@@ -110,9 +130,14 @@ import { PeriodComparison } from '../../models/period-comparison.model';
         </h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-white rounded-lg p-3">
-            <div class="text-sm text-gray-600 mb-1">Si continúa la tendencia actual:</div>
+            <div class="text-sm text-gray-600 mb-1">
+              Si continúa la tendencia actual:
+            </div>
             <div class="font-medium text-gray-800">
-              Balance próximo período: {{ getProjectedBalance() | currency:'EUR':'symbol':'1.0-0' }}
+              Balance próximo período:
+              {{
+                getProjectedBalance() | currency : 'EUR' : 'symbol' : '1.0-0'
+              }}
             </div>
           </div>
           <div class="bg-white rounded-lg p-3">
@@ -125,17 +150,21 @@ import { PeriodComparison } from '../../models/period-comparison.model';
       </div>
     </div>
     }
-  `
+  `,
 })
 export class TrendAnalysisComponent {
   @Input() comparison: PeriodComparison | null = null;
 
   getDailyExpenseP1(): number {
-    return this.comparison ? this.comparison.period1.data.averageDailyExpense : 0;
+    return this.comparison
+      ? this.comparison.period1.data.averageDailyExpense
+      : 0;
   }
 
   getDailyExpenseP2(): number {
-    return this.comparison ? this.comparison.period2.data.averageDailyExpense : 0;
+    return this.comparison
+      ? this.comparison.period2.data.averageDailyExpense
+      : 0;
   }
 
   getVelocityChange(): number {
@@ -145,13 +174,23 @@ export class TrendAnalysisComponent {
   }
 
   getEfficiencyP1(): number {
-    if (!this.comparison || this.comparison.period1.data.totalIncomes === 0) return 0;
-    return (this.comparison.period1.data.totalExpenses / this.comparison.period1.data.totalIncomes) * 100;
+    if (!this.comparison || this.comparison.period1.data.totalIncomes === 0)
+      return 0;
+    return (
+      (this.comparison.period1.data.totalExpenses /
+        this.comparison.period1.data.totalIncomes) *
+      100
+    );
   }
 
   getEfficiencyP2(): number {
-    if (!this.comparison || this.comparison.period2.data.totalIncomes === 0) return 0;
-    return (this.comparison.period2.data.totalExpenses / this.comparison.period2.data.totalIncomes) * 100;
+    if (!this.comparison || this.comparison.period2.data.totalIncomes === 0)
+      return 0;
+    return (
+      (this.comparison.period2.data.totalExpenses /
+        this.comparison.period2.data.totalIncomes) *
+      100
+    );
   }
 
   getEfficiencyChange(): number {
@@ -159,16 +198,20 @@ export class TrendAnalysisComponent {
   }
 
   getCategoriesP1(): number {
-    return this.comparison ? this.comparison.period1.data.categoryBreakdown.length : 0;
+    return this.comparison
+      ? this.comparison.period1.data.categoryBreakdown.length
+      : 0;
   }
 
   getCategoriesP2(): number {
-    return this.comparison ? this.comparison.period2.data.categoryBreakdown.length : 0;
+    return this.comparison
+      ? this.comparison.period2.data.categoryBreakdown.length
+      : 0;
   }
 
   getProjectedBalance(): number {
     if (!this.comparison) return 0;
-    
+
     const trend = this.comparison.metrics.balanceDelta.percentage / 100;
     return this.comparison.period1.data.balance * (1 + trend);
   }
@@ -176,13 +219,17 @@ export class TrendAnalysisComponent {
   getChangeClass(change: number, inverse = false): string {
     const isPositive = inverse ? change < 0 : change > 0;
     if (Math.abs(change) < 1) return 'text-gray-600';
-    return isPositive ? 'text-green-600 font-medium' : 'text-red-600 font-medium';
+    return isPositive
+      ? 'text-green-600 font-medium'
+      : 'text-red-600 font-medium';
   }
 
   getDiversificationClass(): string {
     const diff = this.getCategoriesP1() - this.getCategoriesP2();
     if (Math.abs(diff) <= 1) return 'text-blue-600 font-medium';
-    return diff > 0 ? 'text-green-600 font-medium' : 'text-orange-600 font-medium';
+    return diff > 0
+      ? 'text-green-600 font-medium'
+      : 'text-orange-600 font-medium';
   }
 
   getDiversificationLabel(): string {
@@ -212,7 +259,8 @@ export class TrendAnalysisComponent {
     const rec = this.getRecommendation();
     if (rec.includes('Excelente')) return 'text-green-600';
     if (rec.includes('urgentemente')) return 'text-red-600';
-    if (rec.includes('Revisar') || rec.includes('Buscar')) return 'text-orange-600';
+    if (rec.includes('Revisar') || rec.includes('Buscar'))
+      return 'text-orange-600';
     return 'text-blue-600';
   }
 }

@@ -4,13 +4,15 @@ import { isPlatformBrowser } from '@angular/common';
 declare var Chart: any;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ChartLibraryService {
   private chartJsLoaded = false;
   private loadingPromise: Promise<boolean> | null = null;
-  private readonly CDN_URL = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
-  private readonly FALLBACK_CDN = 'https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js';
+  private readonly CDN_URL =
+    'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+  private readonly FALLBACK_CDN =
+    'https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js';
   private readonly TIMEOUT_MS = 10000; // 10 seconds timeout
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
@@ -42,7 +44,7 @@ export class ChartLibraryService {
       // Try primary CDN first
       console.log('🔄 Loading Chart.js from primary CDN...');
       const success = await this.loadFromUrl(this.CDN_URL);
-      
+
       if (success) {
         console.log('✅ Chart.js loaded successfully from primary CDN');
         this.chartJsLoaded = true;
@@ -52,7 +54,7 @@ export class ChartLibraryService {
       // Try fallback CDN
       console.log('🔄 Primary CDN failed, trying fallback CDN...');
       const fallbackSuccess = await this.loadFromUrl(this.FALLBACK_CDN);
-      
+
       if (fallbackSuccess) {
         console.log('✅ Chart.js loaded successfully from fallback CDN');
         this.chartJsLoaded = true;
@@ -62,7 +64,7 @@ export class ChartLibraryService {
       // Try loading from npm package as last resort
       console.log('🔄 CDNs failed, trying npm package...');
       const npmSuccess = await this.loadFromNpm();
-      
+
       if (npmSuccess) {
         console.log('✅ Chart.js loaded successfully from npm package');
         this.chartJsLoaded = true;
@@ -71,7 +73,6 @@ export class ChartLibraryService {
 
       console.error('❌ All Chart.js loading methods failed');
       return false;
-
     } catch (error) {
       console.error('❌ Critical error loading Chart.js:', error);
       return false;
@@ -92,7 +93,9 @@ export class ChartLibraryService {
         if (typeof Chart !== 'undefined') {
           resolve(true);
         } else {
-          console.warn(`⚠️ Chart.js script loaded but Chart object not available from ${url}`);
+          console.warn(
+            `⚠️ Chart.js script loaded but Chart object not available from ${url}`
+          );
           resolve(false);
         }
       };
@@ -106,12 +109,13 @@ export class ChartLibraryService {
       script.src = url;
       script.async = true;
       script.crossOrigin = 'anonymous';
-      
+
       // Add integrity check for jsdelivr CDN
       if (url.includes('jsdelivr')) {
-        script.integrity = 'sha384-ChL2BKTX0Qa8p7qtH8Iq6WqMcrmZxLN4QQOdLd8p9a3B6KcdPNQGxL2GJ19G3hE';
+        script.integrity =
+          'sha384-ChL2BKTX0Qa8p7qtH8Iq6WqMcrmZxLN4QQOdLd8p9a3B6KcdPNQGxL2GJ19G3hE';
       }
-      
+
       document.head.appendChild(script);
     });
   }

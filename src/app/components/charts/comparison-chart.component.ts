@@ -1,7 +1,23 @@
-import { Component, Input, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  Input,
+  signal,
+  computed,
+  ViewChild,
+  ElementRef,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
-import { PeriodComparison, DeltaMetric } from '../../models/period-comparison.model';
+import {
+  PeriodComparison,
+  DeltaMetric,
+} from '../../models/period-comparison.model';
 
 Chart.register(...registerables);
 
@@ -12,58 +28,67 @@ Chart.register(...registerables);
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       @if (title) {
-        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          @if (icon) {
-            <span class="text-xl">{{ icon }}</span>
-          }
-          {{ title }}
-        </h3>
-      }
-
-      @if (comparison) {
-        <div class="relative">
-          @if (isBrowser) {
-            <canvas
-              #chartCanvas
-              [attr.id]="chartId()"
-              class="max-h-96"
-            ></canvas>
-          } @else {
-            <div class="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
-              <div class="text-center text-gray-500">
-                <div class="text-4xl mb-2">📊</div>
-                <p>Cargando gráfico...</p>
-              </div>
-            </div>
-          }
-
-          @if (showSummary) {
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">{{ period1Label() }}</div>
-                <div class="text-lg font-semibold text-gray-800">{{ period1Value() | currency:'EUR':'symbol':'1.0-0' }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">{{ period2Label() }}</div>
-                <div class="text-lg font-semibold text-gray-800">{{ period2Value() | currency:'EUR':'symbol':'1.0-0' }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-gray-600 text-xs uppercase tracking-wide">Cambio</div>
-                <div class="text-lg font-semibold" [class]="getDeltaClass()">
-                  {{ getDeltaPercentage() > 0 ? '+' : '' }}{{ getDeltaPercentage() | number:'1.1-1' }}%
-                </div>
-              </div>
-            </div>
-          }
+      <h3
+        class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2"
+      >
+        @if (icon) {
+        <span class="text-xl">{{ icon }}</span>
+        }
+        {{ title }}
+      </h3>
+      } @if (comparison) {
+      <div class="relative">
+        @if (isBrowser) {
+        <canvas #chartCanvas [attr.id]="chartId()" class="max-h-96"></canvas>
+        } @else {
+        <div
+          class="flex items-center justify-center h-96 bg-gray-50 rounded-lg"
+        >
+          <div class="text-center text-gray-500">
+            <div class="text-4xl mb-2">📊</div>
+            <p>Cargando gráfico...</p>
+          </div>
         </div>
+        } @if (showSummary) {
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              {{ period1Label() }}
+            </div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ period1Value() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              {{ period2Label() }}
+            </div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ period2Value() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-600 text-xs uppercase tracking-wide">
+              Cambio
+            </div>
+            <div class="text-lg font-semibold" [class]="getDeltaClass()">
+              {{ getDeltaPercentage() > 0 ? '+' : ''
+              }}{{ getDeltaPercentage() | number : '1.1-1' }}%
+            </div>
+          </div>
+        </div>
+        }
+      </div>
       } @else {
-        <div class="text-center py-12">
-          <div class="text-4xl text-gray-300 mb-2">📊</div>
-          <p class="text-gray-500">{{ noDataMessage || 'No hay datos para mostrar' }}</p>
-        </div>
+      <div class="text-center py-12">
+        <div class="text-4xl text-gray-300 mb-2">📊</div>
+        <p class="text-gray-500">
+          {{ noDataMessage || 'No hay datos para mostrar' }}
+        </p>
+      </div>
       }
     </div>
-  `
+  `,
 })
 export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   @Input() comparison: PeriodComparison | null = null;
@@ -72,14 +97,22 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   @Input() icon: string = '';
   @Input() height: number = 400;
   @Input() showSummary: boolean = true;
-  @Input() dataType: 'balance' | 'income' | 'expense' | 'categories' | 'sources' = 'balance';
+  @Input() dataType:
+    | 'balance'
+    | 'income'
+    | 'expense'
+    | 'categories'
+    | 'sources' = 'balance';
   @Input() maxCategories: number = 5;
   @Input() noDataMessage: string = '';
 
-  @ViewChild('chartCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartCanvas', { static: true })
+  canvasRef!: ElementRef<HTMLCanvasElement>;
 
   private chart: Chart | null = null;
-  chartId = signal(`comparison-chart-${Math.random().toString(36).substr(2, 9)}`);
+  chartId = signal(
+    `comparison-chart-${Math.random().toString(36).substr(2, 9)}`
+  );
   isBrowser: boolean;
   private platformId = inject(PLATFORM_ID);
 
@@ -103,10 +136,14 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     if (!comp) return 0;
 
     switch (this.dataType) {
-      case 'balance': return comp.period1.data.balance;
-      case 'income': return comp.period1.data.totalIncomes;
-      case 'expense': return comp.period1.data.totalExpenses;
-      default: return 0;
+      case 'balance':
+        return comp.period1.data.balance;
+      case 'income':
+        return comp.period1.data.totalIncomes;
+      case 'expense':
+        return comp.period1.data.totalExpenses;
+      default:
+        return 0;
     }
   });
 
@@ -115,10 +152,14 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     if (!comp) return 0;
 
     switch (this.dataType) {
-      case 'balance': return comp.period2.data.balance;
-      case 'income': return comp.period2.data.totalIncomes;
-      case 'expense': return comp.period2.data.totalExpenses;
-      default: return 0;
+      case 'balance':
+        return comp.period2.data.balance;
+      case 'income':
+        return comp.period2.data.totalIncomes;
+      case 'expense':
+        return comp.period2.data.totalExpenses;
+      default:
+        return 0;
     }
   });
 
@@ -127,10 +168,14 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     if (!comp) return 0;
 
     switch (this.dataType) {
-      case 'balance': return comp.metrics.balanceDelta.percentage;
-      case 'income': return comp.metrics.incomeDelta.percentage;
-      case 'expense': return comp.metrics.expenseDelta.percentage;
-      default: return 0;
+      case 'balance':
+        return comp.metrics.balanceDelta.percentage;
+      case 'income':
+        return comp.metrics.incomeDelta.percentage;
+      case 'expense':
+        return comp.metrics.expenseDelta.percentage;
+      default:
+        return 0;
     }
   }
 
@@ -157,9 +202,9 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     console.log('🔍 ngOnChanges: Changes detected', {
       hasComparison: changes['comparison']?.currentValue ? 'yes' : 'no',
       dataType: this.dataType,
-      chartType: this.chartType
+      chartType: this.chartType,
     });
-    
+
     if (changes['comparison'] || changes['dataType'] || changes['chartType']) {
       this.updateChart();
     }
@@ -176,7 +221,7 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
       console.log('🔍 createChart: Missing browser, comparison or canvas', {
         isBrowser: this.isBrowser,
         hasComparison: !!this.comparison,
-        hasCanvas: !!this.canvasRef
+        hasCanvas: !!this.canvasRef,
       });
       return;
     }
@@ -197,7 +242,7 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
       type: config.type,
       dataLabels: config.data.labels,
       datasets: config.data.datasets?.length || 0,
-      dataType: this.dataType
+      dataType: this.dataType,
     });
 
     try {
@@ -224,7 +269,7 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
     return {
       type: this.chartType as ChartType,
       data,
-      options
+      options,
     };
   }
 
@@ -281,14 +326,16 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
 
     return {
       labels,
-      datasets: [{
-        label,
-        data: values,
-        backgroundColor: [color + '80', color + '60'],
-        borderColor: [color, color],
-        borderWidth: 2,
-        borderRadius: this.chartType === 'bar' ? 8 : 0,
-      }]
+      datasets: [
+        {
+          label,
+          data: values,
+          backgroundColor: [color + '80', color + '60'],
+          borderColor: [color, color],
+          borderWidth: 2,
+          borderRadius: this.chartType === 'bar' ? 8 : 0,
+        },
+      ],
     };
   }
 
@@ -297,11 +344,11 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
 
     const changes = this.comparison.metrics.categoryChanges
       .slice(0, this.maxCategories)
-      .filter(c => c.period1Amount > 0 || c.period2Amount > 0);
+      .filter((c) => c.period1Amount > 0 || c.period2Amount > 0);
 
-    const labels = changes.map(c => c.name);
-    const period1Data = changes.map(c => c.period1Amount);
-    const period2Data = changes.map(c => c.period2Amount);
+    const labels = changes.map((c) => c.name);
+    const period1Data = changes.map((c) => c.period1Amount);
+    const period2Data = changes.map((c) => c.period2Amount);
 
     return {
       labels,
@@ -321,8 +368,8 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
           borderColor: '#8B5CF6',
           borderWidth: 2,
           borderRadius: this.chartType === 'bar' ? 8 : 0,
-        }
-      ]
+        },
+      ],
     };
   }
 
@@ -331,11 +378,11 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
 
     const changes = this.comparison.metrics.sourceChanges
       .slice(0, this.maxCategories)
-      .filter(c => c.period1Amount > 0 || c.period2Amount > 0);
+      .filter((c) => c.period1Amount > 0 || c.period2Amount > 0);
 
-    const labels = changes.map(c => c.name);
-    const period1Data = changes.map(c => c.period1Amount);
-    const period2Data = changes.map(c => c.period2Amount);
+    const labels = changes.map((c) => c.name);
+    const period1Data = changes.map((c) => c.period1Amount);
+    const period2Data = changes.map((c) => c.period2Amount);
 
     return {
       labels,
@@ -355,8 +402,8 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
           borderColor: '#F59718',
           borderWidth: 2,
           borderRadius: this.chartType === 'bar' ? 8 : 0,
-        }
-      ]
+        },
+      ],
     };
   }
 
@@ -366,12 +413,13 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: this.dataType === 'categories' || this.dataType === 'sources',
+          display:
+            this.dataType === 'categories' || this.dataType === 'sources',
           position: 'top' as const,
           labels: {
             usePointStyle: true,
-            padding: 20
-          }
+            padding: 20,
+          },
         },
         tooltip: {
           mode: 'index' as const,
@@ -389,47 +437,50 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                maximumFractionDigits: 0,
               }).format(value);
               return `${context.dataset.label}: ${formatted}`;
-            }
-          }
-        }
-      },
-      scales: this.chartType === 'bar' ? {
-        x: {
-          grid: {
-            display: false
+            },
           },
-          ticks: {
-            color: '#6B7280'
-          }
         },
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: '#F3F4F6'
-          },
-          ticks: {
-            color: '#6B7280',
-            callback: function(value: any) {
-              return new Intl.NumberFormat('es-ES', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(value);
+      },
+      scales:
+        this.chartType === 'bar'
+          ? {
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: '#6B7280',
+                },
+              },
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: '#F3F4F6',
+                },
+                ticks: {
+                  color: '#6B7280',
+                  callback: function (value: any) {
+                    return new Intl.NumberFormat('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(value);
+                  },
+                },
+              },
             }
-          }
-        }
-      } : {}
+          : {},
     };
 
     return {
       ...baseOptions,
       layout: {
-        padding: 10
-      }
+        padding: 10,
+      },
     };
   }
 }

@@ -78,6 +78,8 @@ export class AppComponent implements OnInit {
           return 'border-purple-500 text-purple-600 bg-purple-50';
         case 'comparison':
           return 'border-indigo-500 text-indigo-600 bg-indigo-50';
+        case 'projections':
+          return 'border-orange-500 text-orange-600 bg-orange-50';
         default:
           return 'border-blue-500 text-blue-600 bg-blue-50';
       }
