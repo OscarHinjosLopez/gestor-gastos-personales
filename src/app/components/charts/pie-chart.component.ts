@@ -8,8 +8,9 @@ import {
   AfterViewInit,
   OnChanges,
   inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NgChartsModule, BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { ChartService } from '../../core/chart.service';
@@ -28,7 +29,7 @@ export interface PieChartDataItem {
   imports: [CommonModule, NgChartsModule],
   template: `
     <div class="relative w-full flex flex-col" [style.height.px]="height">
-      @if (chartData && chartData.labels && chartData.labels.length > 0) {
+      @if (isBrowser && chartData && chartData.labels && chartData.labels.length > 0) {
       <div class="relative flex-1 min-h-0">
         <canvas
           baseChart
@@ -95,9 +96,15 @@ export class PieChartComponent
 
   chartData?: ChartData<'doughnut' | 'pie'>;
   chartOptions?: ChartConfiguration<'doughnut' | 'pie'>['options'];
+  isBrowser: boolean;
 
   private resizeObserver?: ResizeObserver;
   private chartService = inject(ChartService);
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
     this.updateChart();

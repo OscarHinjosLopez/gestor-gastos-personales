@@ -1,5 +1,5 @@
-import { Component, Input, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { Component, Input, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import { PeriodComparison, DeltaMetric } from '../../models/period-comparison.model';
 
@@ -22,11 +22,20 @@ Chart.register(...registerables);
 
       @if (comparison) {
         <div class="relative">
-          <canvas
-            #chartCanvas
-            [attr.id]="chartId()"
-            class="max-h-96"
-          ></canvas>
+          @if (isBrowser) {
+            <canvas
+              #chartCanvas
+              [attr.id]="chartId()"
+              class="max-h-96"
+            ></canvas>
+          } @else {
+            <div class="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+              <div class="text-center text-gray-500">
+                <div class="text-4xl mb-2">📊</div>
+                <p>Cargando gráfico...</p>
+              </div>
+            </div>
+          }
 
           @if (showSummary) {
             <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -71,6 +80,12 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
 
   private chart: Chart | null = null;
   chartId = signal(`comparison-chart-${Math.random().toString(36).substr(2, 9)}`);
+  isBrowser: boolean;
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   // Computed values
   period1Label = computed(() => {
@@ -133,7 +148,7 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    if (this.comparison) {
+    if (this.isBrowser && this.comparison) {
       this.createChart();
     }
   }
@@ -157,8 +172,9 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createChart(): void {
-    if (!this.comparison || !this.canvasRef) {
-      console.log('🔍 createChart: Missing comparison or canvas', {
+    if (!this.isBrowser || !this.comparison || !this.canvasRef) {
+      console.log('🔍 createChart: Missing browser, comparison or canvas', {
+        isBrowser: this.isBrowser,
         hasComparison: !!this.comparison,
         hasCanvas: !!this.canvasRef
       });
@@ -193,7 +209,7 @@ export class ComparisonChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private updateChart(): void {
-    if (this.comparison) {
+    if (this.isBrowser && this.comparison) {
       this.createChart();
     } else if (this.chart) {
       this.chart.destroy();

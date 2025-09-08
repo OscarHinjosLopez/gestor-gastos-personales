@@ -1,5 +1,5 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { Component, Input, ViewChild, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, AfterViewInit, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import { PeriodComparison } from '../../models/period-comparison.model';
 
@@ -22,9 +22,18 @@ Chart.register(...registerables);
 
       @if (comparison) {
         <div class="relative">
-          <div class="w-full h-80">
-            <canvas #chartCanvas></canvas>
-          </div>
+          @if (isBrowser) {
+            <div class="w-full h-80">
+              <canvas #chartCanvas></canvas>
+            </div>
+          } @else {
+            <div class="flex items-center justify-center w-full h-80 bg-gray-50 rounded-lg">
+              <div class="text-center text-gray-500">
+                <div class="text-4xl mb-2">📊</div>
+                <p>Cargando gráfico...</p>
+              </div>
+            </div>
+          }
 
           @if (showSummary && dataType !== 'categories' && dataType !== 'sources') {
             <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -73,16 +82,24 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
   @ViewChild('chartCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
   private chart: Chart | null = null;
+  isBrowser: boolean;
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngAfterViewInit(): void {
-    // Use setTimeout to ensure the view is fully initialized
-    setTimeout(() => {
-      this.createChart();
-    }, 100);
+    if (this.isBrowser) {
+      // Use setTimeout to ensure the view is fully initialized
+      setTimeout(() => {
+        this.createChart();
+      }, 100);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['comparison'] && this.canvasRef) {
+    if (this.isBrowser && changes['comparison'] && this.canvasRef) {
       setTimeout(() => {
         this.createChart();
       }, 100);
@@ -105,8 +122,8 @@ export class SimpleComparisonChartComponent implements AfterViewInit, OnDestroy,
   }
 
   private createChart(): void {
-    if (!this.comparison || !this.canvasRef) {
-      console.log('❌ No comparison or canvas available');
+    if (!this.isBrowser || !this.comparison || !this.canvasRef) {
+      console.log('❌ No browser, comparison or canvas available');
       return;
     }
 

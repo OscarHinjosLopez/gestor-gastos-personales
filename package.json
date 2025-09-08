@@ -1,9 +1,18 @@
 {
   "name": "gestor-gastos-personales",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Una aplicación web moderna y completa para la gestión inteligente de finanzas personales, desarrollada con Angular 18, TypeScript y Tailwind CSS.",
+  "keywords": ["angular", "typescript", "tailwind", "finanzas", "gastos", "ingresos", "pwa", "charts", "responsive"],
+  "author": "Oscar Hinjos López",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OscarHinjosLopez/gestor-gastos-personales.git"
+  },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --configuration=no-ssr",
+    "start:ssr": "ng serve",
     "build": "ng build",
     "build:css": "tailwindcss -i ./src/styles.scss -o ./src/tailwind-output.css",
     "watch": "ng build --watch --configuration development",
