@@ -4,43 +4,48 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./components/dashboard/dashboard.component').then(
+      import('./features/dashboard/dashboard.component').then(
         (m) => m.DashboardComponent
       ),
   },
   {
     path: 'expenses',
     loadComponent: () =>
-      import('./components/expense-list/expense-list.component').then(
+      import('./features/expenses/expense-list/expense-list.component').then(
         (m) => m.ExpenseListComponent
       ),
   },
   {
     path: 'incomes',
     loadComponent: () =>
-      import('./components/income-list/income-list.component').then(
+      import('./features/income/income-list/income-list.component').then(
         (m) => m.IncomeListComponent
       ),
   },
   {
     path: 'stats',
     loadComponent: () =>
-      import('./components/stats/stats.component').then(
-        (m) => m.StatsComponent
-      ),
+      import('./features/stats/stats.component').then((m) => m.StatsComponent),
   },
   {
     path: 'comparison',
     loadComponent: () =>
-      import('./components/period-comparison/period-comparison.component').then(
-        (m) => m.PeriodComparisonComponent
-      ),
+      import(
+        './features/stats/period-comparison/period-comparison.component'
+      ).then((m) => m.PeriodComparisonComponent),
   },
   {
     path: 'projections',
     loadComponent: () =>
-      import('./components/projections/projections.component').then(
+      import('./features/projections/projections.component').then(
         (m) => m.ProjectionsComponent
+      ),
+  },
+  {
+    path: 'budget-alerts',
+    loadComponent: () =>
+      import('./features/budget/budget-alerts/budget-alerts.component').then(
+        (m) => m.BudgetAlertsComponent
       ),
   },
   { path: '**', redirectTo: '' },

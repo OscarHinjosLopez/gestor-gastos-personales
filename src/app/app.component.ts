@@ -10,9 +10,9 @@ import { RouterOutlet, Router } from '@angular/router';
 import { StateService } from './core/state.service';
 import { LoadingService } from './core/loading.service';
 import { PwaService } from './core/pwa.service';
-import { ExpenseFormComponent } from './components/expense-form/expense-form.component';
-import { IncomeFormComponent } from './components/income-form/income-form.component';
-import { NotificationContainerComponent } from './shared/notification-container.component';
+import { ExpenseFormComponent } from './features/expenses/expense-form/expense-form.component';
+import { IncomeFormComponent } from './features/income/income-form/income-form.component';
+import { NotificationContainerComponent } from './shared/components/notification-container.component';
 
 @Component({
   selector: 'app-root',
@@ -80,6 +80,8 @@ export class AppComponent implements OnInit {
           return 'border-indigo-500 text-indigo-600 bg-indigo-50';
         case 'projections':
           return 'border-orange-500 text-orange-600 bg-orange-50';
+        case 'budget-alerts':
+          return 'border-red-500 text-red-600 bg-red-50';
         default:
           return 'border-blue-500 text-blue-600 bg-blue-50';
       }

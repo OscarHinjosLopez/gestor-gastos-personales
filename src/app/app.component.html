@@ -74,6 +74,13 @@
             >
               📈 Proyecciones
             </button>
+            <button
+              (click)="navigateToTab('budget-alerts')"
+              [class]="getCurrentTabClass('budget-alerts')"
+              class="flex-1 py-2 px-1 text-center border-b-2 font-medium text-sm transition-colors"
+            >
+              🚨 Alertas
+            </button>
           </nav>
         </div>
 
