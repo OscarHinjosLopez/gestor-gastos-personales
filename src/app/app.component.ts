@@ -80,6 +80,8 @@ export class AppComponent implements OnInit {
           return 'border-indigo-500 text-indigo-600 bg-indigo-50';
         case 'projections':
           return 'border-orange-500 text-orange-600 bg-orange-50';
+        case 'budget-alerts':
+          return 'border-red-500 text-red-600 bg-red-50';
         default:
           return 'border-blue-500 text-blue-600 bg-blue-50';
       }

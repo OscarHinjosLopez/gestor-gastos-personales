@@ -43,5 +43,12 @@ export const routes: Routes = [
         (m) => m.ProjectionsComponent
       ),
   },
+  {
+    path: 'budget-alerts',
+    loadComponent: () =>
+      import('./components/budget-alerts/budget-alerts.component').then(
+        (m) => m.BudgetAlertsComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

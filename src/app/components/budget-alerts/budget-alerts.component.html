@@ -1,0 +1,636 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header with Summary Cards -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">
+        🚨 Alertas de Presupuesto
+      </h1>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-sm border">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white text-sm font-bold">{{
+                  budgetSummary().activeBudgets
+                }}</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">
+                Presupuestos Activos
+              </p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ budgetSummary().activeBudgets }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-sm border">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white text-sm font-bold">{{
+                  unreadAlerts().length
+                }}</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">
+                Alertas Pendientes
+              </p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ unreadAlerts().length }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-sm border">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white text-sm font-bold">{{
+                  budgetSummary().overBudgetCount
+                }}</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">
+                Presupuestos Excedidos
+              </p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ budgetSummary().overBudgetCount }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-sm border">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white text-xs">€</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Total Asignado</p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ formatCurrency(budgetSummary().totalAllocated) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white rounded-lg shadow-sm border mb-8">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex">
+          <button
+            (click)="selectTab('alerts')"
+            [class]="
+              selectedTab() === 'alerts'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            "
+            class="py-2 px-4 border-b-2 font-medium text-sm"
+          >
+            🚨 Alertas ({{ alerts().length }})
+          </button>
+          <button
+            (click)="selectTab('budgets')"
+            [class]="
+              selectedTab() === 'budgets'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            "
+            class="py-2 px-4 border-b-2 font-medium text-sm"
+          >
+            💰 Presupuestos ({{ budgets().length }})
+          </button>
+          <button
+            (click)="selectTab('settings')"
+            [class]="
+              selectedTab() === 'settings'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            "
+            class="py-2 px-4 border-b-2 font-medium text-sm"
+          >
+            ⚙️ Configuración
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="p-6">
+        <!-- Alerts Tab -->
+        @if (selectedTab() === 'alerts') {
+        <div>
+          @if (alerts().length === 0) {
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">✅</div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">
+              No hay alertas activas
+            </h3>
+            <p class="text-gray-500">
+              Todos tus presupuestos están bajo control
+            </p>
+          </div>
+          } @else {
+          <!-- Critical Alerts First -->
+          @if (criticalAlerts().length > 0) {
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold text-red-600 mb-4">
+              🚨 Alertas Críticas
+            </h3>
+            @for (alert of criticalAlerts(); track alert.id) {
+            <div
+              [class]="
+                getAlertClass(alert.type, alert.priority) + ' cursor-pointer'
+              "
+              (click)="markAlertAsRead(alert)"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <span class="text-lg mr-2">{{
+                      getAlertIcon(alert.type)
+                    }}</span>
+                    <h4 class="font-semibold">{{ alert.title }}</h4>
+                    @if (!alert.isRead) {
+                    <span
+                      class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800"
+                    >
+                      Nuevo
+                    </span>
+                    }
+                  </div>
+                  <p class="text-sm mb-2">{{ alert.message }}</p>
+                  <div class="flex items-center text-xs text-gray-600">
+                    <span
+                      >{{ alert.category }} •
+                      {{ alert.triggeredAt | date : "short" }}</span
+                    >
+                  </div>
+                </div>
+                <div class="flex-shrink-0 ml-4">
+                  <button
+                    (click)="dismissAlert(alert); $event.stopPropagation()"
+                    class="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+
+          <!-- All Alerts -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Todas las Alertas
+            </h3>
+            @for (alert of alerts(); track alert.id) {
+            <div
+              [class]="
+                getAlertClass(alert.type, alert.priority) + ' cursor-pointer'
+              "
+              (click)="markAlertAsRead(alert)"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <span class="text-lg mr-2">{{
+                      getAlertIcon(alert.type)
+                    }}</span>
+                    <h4 class="font-semibold">{{ alert.title }}</h4>
+                    @if (!alert.isRead) {
+                    <span
+                      class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                    >
+                      Nuevo
+                    </span>
+                    }
+                  </div>
+                  <p class="text-sm mb-2">{{ alert.message }}</p>
+                  <div
+                    class="flex items-center justify-between text-xs text-gray-600"
+                  >
+                    <span
+                      >{{ alert.category }} •
+                      {{ alert.triggeredAt | date : "short" }}</span
+                    >
+                    <span class="font-medium"
+                      >{{ alert.percentageUsed.toFixed(1) }}% usado</span
+                    >
+                  </div>
+                </div>
+                <div class="flex-shrink-0 ml-4">
+                  <button
+                    (click)="dismissAlert(alert); $event.stopPropagation()"
+                    class="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Budgets Tab -->
+        @if (selectedTab() === 'budgets') {
+        <div>
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-semibold text-gray-800">
+              Gestión de Presupuestos
+            </h3>
+            <button
+              (click)="openCreateBudgetModal()"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+            >
+              ➕ Crear Presupuesto
+            </button>
+          </div>
+
+          @if (budgetStatuses().length === 0) {
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">💰</div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">
+              No tienes presupuestos configurados
+            </h3>
+            <p class="text-gray-500 mb-6">
+              Crea tu primer presupuesto para comenzar a monitorear tus gastos
+            </p>
+            <button
+              (click)="openCreateBudgetModal()"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
+            >
+              Crear Primer Presupuesto
+            </button>
+          </div>
+          } @else {
+          <div class="grid gap-6">
+            @for (status of budgetStatuses(); track status.budgetId) {
+            <div class="bg-white border rounded-lg p-6">
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-900">
+                    {{ status.budgetName }}
+                  </h4>
+                  <p class="text-sm text-gray-600">{{ status.category }}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span
+                    [class]="getBudgetStatusClass(status.status)"
+                    class="px-2 py-1 text-xs font-medium rounded-full"
+                  >
+                    {{ getBudgetStatusText(status.status) }}
+                  </span>
+                  <button
+                    (click)="
+                      openDeleteBudgetConfirm(getBudgetById(status.budgetId)!)
+                    "
+                    class="text-red-500 hover:text-red-700"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mb-4">
+                <div class="flex justify-between text-sm mb-2">
+                  <span
+                    >Gastado: {{ formatCurrency(status.currentSpending) }}</span
+                  >
+                  <span>Límite: {{ formatCurrency(status.budgetLimit) }}</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    [class]="getProgressBarClass(status.percentageUsed)"
+                    class="h-3 rounded-full transition-all duration-300"
+                    [style.width.%]="
+                      getProgressBarWidth(
+                        status.currentSpending,
+                        status.budgetLimit
+                      )
+                    "
+                  ></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600 mt-1">
+                  <span>{{ status.percentageUsed.toFixed(1) }}% usado</span>
+                  <span>{{ getDaysRemainingText(status.daysRemaining) }}</span>
+                </div>
+              </div>
+
+              <!-- Remaining and Projection -->
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="font-medium text-gray-700">Restante:</span>
+                  <span
+                    [class]="
+                      status.remainingAmount >= 0
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    "
+                    class="ml-1"
+                  >
+                    {{ formatCurrency(status.remainingAmount) }}
+                  </span>
+                </div>
+                @if (status.projectedOverrun) {
+                <div>
+                  <span class="font-medium text-red-700"
+                    >Proyección de exceso:</span
+                  >
+                  <span class="text-red-600 ml-1">{{
+                    formatCurrency(status.projectedOverrun)
+                  }}</span>
+                </div>
+                }
+              </div>
+
+              <!-- Alerts for this budget -->
+              @if (status.alerts.length > 0) {
+              <div class="mt-4 pt-4 border-t">
+                <p class="text-sm font-medium text-gray-700 mb-2">
+                  Alertas Activas:
+                </p>
+                @for (alert of status.alerts; track alert.id) {
+                <div class="text-xs text-gray-600 mb-1">
+                  {{ getAlertIcon(alert.type) }} {{ alert.title }} -
+                  {{ alert.triggeredAt | date : "short" }}
+                </div>
+                }
+              </div>
+              }
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Settings Tab -->
+        @if (selectedTab() === 'settings') {
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-6">
+            Configuración de Alertas
+          </h3>
+
+          <form [formGroup]="configForm" (ngSubmit)="saveConfiguration()">
+            <!-- Notification Settings -->
+            <div class="bg-white border rounded-lg p-6 mb-6">
+              <h4 class="text-md font-semibold text-gray-800 mb-4">
+                Notificaciones
+              </h4>
+              <div class="space-y-4">
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="enableNotifications"
+                    class="mr-3"
+                  />
+                  <span>Habilitar notificaciones de alertas</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="soundEnabled"
+                    class="mr-3"
+                  />
+                  <span>Sonido en notificaciones</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="emailNotifications"
+                    class="mr-3"
+                  />
+                  <span>Notificaciones por email</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Report Settings -->
+            <div class="bg-white border rounded-lg p-6 mb-6">
+              <h4 class="text-md font-semibold text-gray-800 mb-4">Reportes</h4>
+              <div class="space-y-4">
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="dailyDigest"
+                    class="mr-3"
+                  />
+                  <span>Resumen diario</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="weeklyReport"
+                    class="mr-3"
+                  />
+                  <span>Reporte semanal</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="autoCreateMonthlyBudgets"
+                    class="mr-3"
+                  />
+                  <span>Crear presupuestos mensuales automáticamente</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Default Thresholds -->
+            <div class="bg-white border rounded-lg p-6 mb-6">
+              <h4 class="text-md font-semibold text-gray-800 mb-4">
+                Umbrales por Defecto
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Umbral de Advertencia (%)
+                  </label>
+                  <input
+                    type="number"
+                    formControlName="defaultWarningThreshold"
+                    min="1"
+                    max="99"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Umbral de Peligro (%)
+                  </label>
+                  <input
+                    type="number"
+                    formControlName="defaultDangerThreshold"
+                    min="2"
+                    max="100"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                [disabled]="isLoading('save-config')"
+                class="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-medium"
+              >
+                @if (isLoading('save-config')) {
+                <span class="inline-block animate-spin mr-2">⟳</span>
+                } Guardar Configuración
+              </button>
+            </div>
+          </form>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Budget Modal -->
+  @if (showCreateBudgetModal()) {
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        Crear Nuevo Presupuesto
+      </h3>
+
+      <form [formGroup]="budgetForm" (ngSubmit)="createBudget()">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Nombre</label
+            >
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="ej. Alimentación Febrero"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Categoría</label
+            >
+            <select
+              formControlName="category"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Seleccionar categoría</option>
+              @for (category of availableCategories; track category) {
+              <option [value]="category">{{ category }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Límite Mensual (€)</label
+            >
+            <input
+              type="number"
+              formControlName="monthlyLimit"
+              min="1"
+              step="0.01"
+              placeholder="500.00"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Umbral Advertencia (%)</label
+              >
+              <input
+                type="number"
+                formControlName="warningThreshold"
+                min="1"
+                max="100"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Umbral Peligro (%)</label
+              >
+              <input
+                type="number"
+                formControlName="dangerThreshold"
+                min="1"
+                max="100"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="isActive" class="mr-3" />
+            <span>Presupuesto activo</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-6">
+          <button
+            type="button"
+            (click)="closeCreateBudgetModal()"
+            class="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="!budgetForm.valid || isLoading('create-budget')"
+            class="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg"
+          >
+            @if (isLoading('create-budget')) {
+            <span class="inline-block animate-spin mr-2">⟳</span>
+            } Crear Presupuesto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteConfirmModal() && deleteModalData()) {
+  <app-confirm-modal
+    [isOpen]="true"
+    [data]="deleteModalData()!"
+    (confirm)="deleteBudget()"
+    (cancel)="closeDeleteBudgetConfirm()"
+  >
+  </app-confirm-modal>
+  }
+</div>
