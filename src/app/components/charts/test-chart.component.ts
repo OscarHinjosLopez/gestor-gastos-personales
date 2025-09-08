@@ -7,28 +7,40 @@ import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
   imports: [CommonModule, CurrencyPipe],
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+      <h3
+        class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2"
+      >
         <span class="text-xl">{{ icon }}</span>
         {{ title }}
       </h3>
 
       @if (showSummary) {
-        <div class="grid grid-cols-3 gap-4 text-sm mb-4">
-          <div class="bg-blue-50 rounded-lg p-3">
-            <div class="text-blue-600 text-xs uppercase tracking-wide">{{ label1 }}</div>
-            <div class="text-lg font-semibold text-blue-800">{{ value1 | currency:'EUR':'symbol':'1.0-0' }}</div>
+      <div class="grid grid-cols-3 gap-4 text-sm mb-4">
+        <div class="bg-blue-50 rounded-lg p-3">
+          <div class="text-blue-600 text-xs uppercase tracking-wide">
+            {{ label1 }}
           </div>
-          <div class="bg-green-50 rounded-lg p-3">
-            <div class="text-green-600 text-xs uppercase tracking-wide">{{ label2 }}</div>
-            <div class="text-lg font-semibold text-green-800">{{ value2 | currency:'EUR':'symbol':'1.0-0' }}</div>
-          </div>
-          <div class="bg-gray-50 rounded-lg p-3">
-            <div class="text-gray-600 text-xs uppercase tracking-wide">Cambio</div>
-            <div class="text-lg font-semibold" [class]="getPercentageClass()">
-              {{ getPercentageText() }}
-            </div>
+          <div class="text-lg font-semibold text-blue-800">
+            {{ value1 | currency : 'EUR' : 'symbol' : '1.0-0' }}
           </div>
         </div>
+        <div class="bg-green-50 rounded-lg p-3">
+          <div class="text-green-600 text-xs uppercase tracking-wide">
+            {{ label2 }}
+          </div>
+          <div class="text-lg font-semibold text-green-800">
+            {{ value2 | currency : 'EUR' : 'symbol' : '1.0-0' }}
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <div class="text-gray-600 text-xs uppercase tracking-wide">
+            Cambio
+          </div>
+          <div class="text-lg font-semibold" [class]="getPercentageClass()">
+            {{ getPercentageText() }}
+          </div>
+        </div>
+      </div>
       }
 
       <!-- Simple Bar Chart using CSS -->
@@ -36,10 +48,12 @@ import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-sm font-medium text-gray-700">{{ label1 }}</span>
-            <span class="text-sm text-gray-600">{{ value1 | currency:'EUR':'symbol':'1.0-0' }}</span>
+            <span class="text-sm text-gray-600">{{
+              value1 | currency : 'EUR' : 'symbol' : '1.0-0'
+            }}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-6">
-            <div 
+            <div
               class="h-6 rounded-full transition-all duration-1000 ease-out"
               [style.width.%]="getBarWidth(value1)"
               [style.background-color]="color"
@@ -50,10 +64,12 @@ import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-sm font-medium text-gray-700">{{ label2 }}</span>
-            <span class="text-sm text-gray-600">{{ value2 | currency:'EUR':'symbol':'1.0-0' }}</span>
+            <span class="text-sm text-gray-600">{{
+              value2 | currency : 'EUR' : 'symbol' : '1.0-0'
+            }}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-6">
-            <div 
+            <div
               class="h-6 rounded-full transition-all duration-1000 ease-out"
               [style.width.%]="getBarWidth(value2)"
               [style.background-color]="getBarColor()"
@@ -64,10 +80,11 @@ import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 
       <!-- Debug Info -->
       <div class="mt-4 p-3 bg-gray-50 rounded text-xs">
-        <strong>Debug:</strong> {{ title }} - V1: {{ value1 }} | V2: {{ value2 }} | Change: {{ getPercentage() }}%
+        <strong>Debug:</strong> {{ title }} - V1: {{ value1 }} | V2:
+        {{ value2 }} | Change: {{ getPercentage() }}%
       </div>
     </div>
-  `
+  `,
 })
 export class TestChartComponent implements OnInit {
   @Input() title: string = '';
@@ -87,7 +104,7 @@ export class TestChartComponent implements OnInit {
       title: this.title,
       value1: this.value1,
       value2: this.value2,
-      isBrowser: isPlatformBrowser(this.platformId)
+      isBrowser: isPlatformBrowser(this.platformId),
     });
   }
 

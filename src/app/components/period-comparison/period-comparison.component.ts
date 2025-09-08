@@ -40,17 +40,23 @@ import {
   template: `
     <div class="max-w-7xl mx-auto p-6 space-y-6">
       <!-- Header mejorado -->
-      <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white">
+      <div
+        class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white"
+      >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div class="text-4xl">📊</div>
             <div>
               <h1 class="text-2xl font-bold">Comparar Períodos</h1>
-              <p class="text-purple-100">Descubre cómo han evolucionado tus finanzas</p>
+              <p class="text-purple-100">
+                Descubre cómo han evolucionado tus finanzas
+              </p>
             </div>
           </div>
           @if (currentComparison()) {
-          <div class="hidden md:flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+          <div
+            class="hidden md:flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2"
+          >
             <span class="text-sm">{{ getComparisonSummary() }}</span>
           </div>
           }
@@ -59,288 +65,334 @@ import {
 
       <!-- Estado condicional -->
       @if (isLoading()) {
-        <!-- Estado de carga -->
-        <div class="bg-white rounded-2xl p-12 shadow-sm border border-gray-200 text-center">
-          <div class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">Analizando tus datos...</h3>
-          <p class="text-gray-600">Esto solo tomará unos segundos</p>
-        </div>
+      <!-- Estado de carga -->
+      <div
+        class="bg-white rounded-2xl p-12 shadow-sm border border-gray-200 text-center"
+      >
+        <div
+          class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+        ></div>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+          Analizando tus datos...
+        </h3>
+        <p class="text-gray-600">Esto solo tomará unos segundos</p>
+      </div>
       } @else if (currentComparison()) {
-        <!-- Vista de resultados -->
+      <!-- Vista de resultados -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <button
+              (click)="goBackToSelection()"
+              class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Cambiar períodos"
+            >
+              ← Cambiar períodos
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600">Comparando:</span>
+            <span class="font-medium text-gray-800">{{
+              getPeriod1Label()
+            }}</span>
+            <span class="text-gray-400">vs</span>
+            <span class="font-medium text-gray-800">{{
+              getPeriod2Label()
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Métricas de resumen -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Balance -->
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-sm font-medium text-gray-600">Balance</div>
+              <div class="text-2xl">�</div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-2xl font-bold text-blue-600">
+                {{ getBalanceValue1() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm text-gray-500">
+                vs
+                {{ getBalanceValue2() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm" [class]="getBalanceChangeClass()">
+                {{ getBalanceChangeText() }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Ingresos -->
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-sm font-medium text-gray-600">Ingresos</div>
+              <div class="text-2xl">📈</div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-2xl font-bold text-green-600">
+                {{ getIncomeValue1() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm text-gray-500">
+                vs
+                {{ getIncomeValue2() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm" [class]="getIncomeChangeClass()">
+                {{ getIncomeChangeText() }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Gastos -->
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-sm font-medium text-gray-600">Gastos</div>
+              <div class="text-2xl">📉</div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-2xl font-bold text-red-600">
+                {{ getExpenseValue1() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm text-gray-500">
+                vs
+                {{ getExpenseValue2() | currency : 'EUR' : 'symbol' : '1.0-0' }}
+              </div>
+              <div class="text-sm" [class]="getExpenseChangeClass()">
+                {{ getExpenseChangeText() }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráficos de comparación -->
+        <div class="space-y-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <app-test-chart
+              [title]="'Comparación de Balance'"
+              [icon]="'💰'"
+              [value1]="getBalanceValue1()"
+              [value2]="getBalanceValue2()"
+              [label1]="getPeriod1Label()"
+              [label2]="getPeriod2Label()"
+              [color]="'#10B981'"
+              [showSummary]="true"
+              [chartId]="'balance-chart'"
+            ></app-test-chart>
+
+            <app-test-chart
+              [title]="'Comparación de Ingresos'"
+              [icon]="'📈'"
+              [value1]="getIncomeValue1()"
+              [value2]="getIncomeValue2()"
+              [label1]="getPeriod1Label()"
+              [label2]="getPeriod2Label()"
+              [color]="'#3B82F6'"
+              [showSummary]="true"
+              [chartId]="'income-chart'"
+            ></app-test-chart>
+          </div>
+
+          <div class="w-full">
+            <app-test-chart
+              [title]="'Comparación de Gastos'"
+              [icon]="'📉'"
+              [value1]="getExpenseValue1()"
+              [value2]="getExpenseValue2()"
+              [label1]="getPeriod1Label()"
+              [label2]="getPeriod2Label()"
+              [color]="'#EF4444'"
+              [showSummary]="true"
+              [chartId]="'expense-chart'"
+            ></app-test-chart>
+          </div>
+        </div>
+
+        <!-- Análisis de tendencias -->
+        <app-trend-analysis
+          [comparison]="currentComparison()!"
+        ></app-trend-analysis>
+
+        <!-- Botones de acción -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-              <button 
-                (click)="goBackToSelection()"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Cambiar períodos"
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-800">Acciones</h3>
+            <div class="flex items-center gap-4">
+              <button
+                (click)="exportComparison()"
+                class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                ← Cambiar períodos
+                <span>📊</span>
+                Exportar
+              </button>
+              <button
+                (click)="copyToClipboard()"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <span>📋</span>
+                Copiar
               </button>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600">Comparando:</span>
-              <span class="font-medium text-gray-800">{{ getPeriod1Label() }}</span>
-              <span class="text-gray-400">vs</span>
-              <span class="font-medium text-gray-800">{{ getPeriod2Label() }}</span>
-            </div>
-          </div>
-
-          <!-- Métricas de resumen -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Balance -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div class="flex items-center justify-between mb-4">
-                <div class="text-sm font-medium text-gray-600">Balance</div>
-                <div class="text-2xl">�</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-2xl font-bold text-blue-600">
-                  {{ getBalanceValue1() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm text-gray-500">
-                  vs {{ getBalanceValue2() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm" [class]="getBalanceChangeClass()">
-                  {{ getBalanceChangeText() }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Ingresos -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div class="flex items-center justify-between mb-4">
-                <div class="text-sm font-medium text-gray-600">Ingresos</div>
-                <div class="text-2xl">📈</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-2xl font-bold text-green-600">
-                  {{ getIncomeValue1() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm text-gray-500">
-                  vs {{ getIncomeValue2() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm" [class]="getIncomeChangeClass()">
-                  {{ getIncomeChangeText() }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Gastos -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div class="flex items-center justify-between mb-4">
-                <div class="text-sm font-medium text-gray-600">Gastos</div>
-                <div class="text-2xl">📉</div>
-              </div>
-              <div class="space-y-2">
-                <div class="text-2xl font-bold text-red-600">
-                  {{ getExpenseValue1() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm text-gray-500">
-                  vs {{ getExpenseValue2() | currency:'EUR':'symbol':'1.0-0' }}
-                </div>
-                <div class="text-sm" [class]="getExpenseChangeClass()">
-                  {{ getExpenseChangeText() }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Gráficos de comparación -->
-          <div class="space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <app-test-chart
-                [title]="'Comparación de Balance'"
-                [icon]="'💰'"
-                [value1]="getBalanceValue1()"
-                [value2]="getBalanceValue2()"
-                [label1]="getPeriod1Label()"
-                [label2]="getPeriod2Label()"
-                [color]="'#10B981'"
-                [showSummary]="true"
-                [chartId]="'balance-chart'"
-              ></app-test-chart>
-
-              <app-test-chart
-                [title]="'Comparación de Ingresos'"
-                [icon]="'📈'"
-                [value1]="getIncomeValue1()"
-                [value2]="getIncomeValue2()"
-                [label1]="getPeriod1Label()"
-                [label2]="getPeriod2Label()"
-                [color]="'#3B82F6'"
-                [showSummary]="true"
-                [chartId]="'income-chart'"
-              ></app-test-chart>
-            </div>
-
-            <div class="w-full">
-              <app-test-chart
-                [title]="'Comparación de Gastos'"
-                [icon]="'📉'"
-                [value1]="getExpenseValue1()"
-                [value2]="getExpenseValue2()"
-                [label1]="getPeriod1Label()"
-                [label2]="getPeriod2Label()"
-                [color]="'#EF4444'"
-                [showSummary]="true"
-                [chartId]="'expense-chart'"
-              ></app-test-chart>
-            </div>
-          </div>
-
-          <!-- Análisis de tendencias -->
-          <app-trend-analysis [comparison]="currentComparison()!"></app-trend-analysis>
-
-          <!-- Botones de acción -->
-          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-800">Acciones</h3>
-              <div class="flex items-center gap-4">
-                <button
-                  (click)="exportComparison()"
-                  class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <span>📊</span>
-                  Exportar
-                </button>
-                <button
-                  (click)="copyToClipboard()"
-                  class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <span>📋</span>
-                  Copiar
-                </button>
-              </div>
-            </div>
           </div>
         </div>
+      </div>
       } @else {
-        <!-- Estado inicial mejorado -->
-        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
-          <div class="text-center mb-8">
-            <div class="text-6xl mb-4">🔍</div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">¿Qué quieres comparar?</h2>
-            <p class="text-gray-600 max-w-md mx-auto">
-              Selecciona dos períodos para ver cómo han cambiado tus ingresos, gastos y ahorros
-            </p>
-          </div>
+      <!-- Estado inicial mejorado -->
+      <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+        <div class="text-center mb-8">
+          <div class="text-6xl mb-4">🔍</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">
+            ¿Qué quieres comparar?
+          </h2>
+          <p class="text-gray-600 max-w-md mx-auto">
+            Selecciona dos períodos para ver cómo han cambiado tus ingresos,
+            gastos y ahorros
+          </p>
+        </div>
 
-          <!-- Comparaciones rápidas más visuales -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            @for (preset of getPopularPresets(); track preset.id) {
-            <button
-              (click)="selectPreset(preset)"
-              class="p-6 text-left border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 group"
+        <!-- Comparaciones rápidas más visuales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          @for (preset of getPopularPresets(); track preset.id) {
+          <button
+            (click)="selectPreset(preset)"
+            class="p-6 text-left border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 group"
+          >
+            <div class="text-2xl mb-2">{{ getPresetIcon(preset.id) }}</div>
+            <div
+              class="font-semibold text-gray-800 group-hover:text-purple-700"
             >
-              <div class="text-2xl mb-2">{{ getPresetIcon(preset.id) }}</div>
-              <div class="font-semibold text-gray-800 group-hover:text-purple-700">{{ preset.label }}</div>
-              <div class="text-sm text-gray-600 mt-1">{{ preset.description }}</div>
-              <div class="text-xs text-purple-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                👆 Click para comparar
-              </div>
-            </button>
-            }
-          </div>
-
-          <!-- Sección fechas personalizadas colapsable -->
-          <div class="border-t pt-8">
-            <button
-              (click)="toggleCustomDates()"
-              class="flex items-center justify-between w-full p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              {{ preset.label }}
+            </div>
+            <div class="text-sm text-gray-600 mt-1">
+              {{ preset.description }}
+            </div>
+            <div
+              class="text-xs text-purple-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <div class="flex items-center gap-3">
-                <span class="text-xl">�</span>
-                <div class="text-left">
-                  <div class="font-medium text-gray-800">Fechas Personalizadas</div>
-                  <div class="text-sm text-gray-600">Elige exactamente qué períodos comparar</div>
-                </div>
-              </div>
-              <div class="text-gray-400 transition-transform duration-200" 
-                   [class.rotate-180]="showCustomDates()">
-                ▼
-              </div>
-            </button>
+              👆 Click para comparar
+            </div>
+          </button>
+          }
+        </div>
 
-            @if (showCustomDates()) {
-            <div class="mt-6 bg-gray-50 rounded-lg p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Período 1 -->
-                <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
-                  <h4 class="font-medium text-blue-800 mb-4 flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    Primer Período
-                  </h4>
-                  <div class="space-y-3">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
-                      <input
-                        type="date"
-                        [(ngModel)]="customPeriod1().start"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
-                      <input
-                        type="date"
-                        [(ngModel)]="customPeriod1().end"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
+        <!-- Sección fechas personalizadas colapsable -->
+        <div class="border-t pt-8">
+          <button
+            (click)="toggleCustomDates()"
+            class="flex items-center justify-between w-full p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-xl">�</span>
+              <div class="text-left">
+                <div class="font-medium text-gray-800">
+                  Fechas Personalizadas
                 </div>
-
-                <!-- Período 2 -->
-                <div class="bg-white rounded-lg p-4 border-2 border-orange-200">
-                  <h4 class="font-medium text-orange-800 mb-4 flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    Segundo Período
-                  </h4>
-                  <div class="space-y-3">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
-                      <input
-                        type="date"
-                        [(ngModel)]="customPeriod2().start"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
-                      <input
-                        type="date"
-                        [(ngModel)]="customPeriod2().end"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
+                <div class="text-sm text-gray-600">
+                  Elige exactamente qué períodos comparar
                 </div>
-              </div>
-
-              <div class="mt-6 text-center">
-                <button
-                  (click)="compareCustomPeriods()"
-                  [disabled]="!isCustomPeriodValid() || isLoading()"
-                  class="bg-purple-600 text-white px-8 py-3 rounded-xl font-medium transition-colors hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  @if (isLoading()) {
-                  <span class="flex items-center justify-center gap-2">
-                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Comparando...
-                  </span>
-                  } @else { 
-                  <span class="flex items-center justify-center gap-2">
-                    <span>🔍</span>
-                    Comparar Períodos
-                  </span>
-                  }
-                </button>
               </div>
             </div>
-            }
+            <div
+              class="text-gray-400 transition-transform duration-200"
+              [class.rotate-180]="showCustomDates()"
+            >
+              ▼
+            </div>
+          </button>
+
+          @if (showCustomDates()) {
+          <div class="mt-6 bg-gray-50 rounded-lg p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Período 1 -->
+              <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
+                <h4
+                  class="font-medium text-blue-800 mb-4 flex items-center gap-2"
+                >
+                  <span class="text-xl">📅</span>
+                  Primer Período
+                </h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Desde</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="customPeriod1().start"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Hasta</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="customPeriod1().end"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Período 2 -->
+              <div class="bg-white rounded-lg p-4 border-2 border-orange-200">
+                <h4
+                  class="font-medium text-orange-800 mb-4 flex items-center gap-2"
+                >
+                  <span class="text-xl">📅</span>
+                  Segundo Período
+                </h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Desde</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="customPeriod2().start"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Hasta</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="customPeriod2().end"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button
+                (click)="compareCustomPeriods()"
+                [disabled]="!isCustomPeriodValid() || isLoading()"
+                class="bg-purple-600 text-white px-8 py-3 rounded-xl font-medium transition-colors hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                @if (isLoading()) {
+                <span class="flex items-center justify-center gap-2">
+                  <div
+                    class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                  ></div>
+                  Comparando...
+                </span>
+                } @else {
+                <span class="flex items-center justify-center gap-2">
+                  <span>🔍</span>
+                  Comparar Períodos
+                </span>
+                }
+              </button>
+            </div>
           </div>
+          }
         </div>
+      </div>
       }
     </div>
   `,
@@ -436,7 +488,7 @@ export class PeriodComparisonComponent implements OnInit {
       incomes: this.stateService.incomes().length,
       selectedPreset: this.selectedPreset(),
       customPeriod1: this.customPeriod1(),
-      customPeriod2: this.customPeriod2()
+      customPeriod2: this.customPeriod2(),
     });
 
     const comp = this.currentComparison();
@@ -444,14 +496,14 @@ export class PeriodComparisonComponent implements OnInit {
       console.log('🔍 DEBUG: Comparison details', {
         period1: {
           range: comp.period1.range,
-          data: comp.period1.data
+          data: comp.period1.data,
         },
         period2: {
-          range: comp.period2.range, 
-          data: comp.period2.data
+          range: comp.period2.range,
+          data: comp.period2.data,
         },
         metrics: comp.metrics,
-        insights: comp.insights
+        insights: comp.insights,
       });
     }
   }
@@ -462,29 +514,29 @@ export class PeriodComparisonComponent implements OnInit {
       if (isPlatformBrowser(this.platformId)) {
         localStorage.removeItem('sample-data-added');
       }
-      
+
       // Clear existing data by deleting all items
       const expenses = this.stateService.expenses();
       const incomes = this.stateService.incomes();
-      
+
       // Delete all expenses
       for (const expense of expenses) {
         await this.stateService.deleteExpense(expense.id);
       }
-      
+
       // Delete all incomes
       for (const income of incomes) {
         await this.stateService.deleteIncome(income.id);
       }
-      
+
       // Add fresh sample data
       await this.addSampleData();
-      
+
       // Set flag
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem('sample-data-added', 'true');
       }
-      
+
       // Load default comparison
       const defaultPreset = this.periodPresets.find(
         (p) => p.id === 'this-vs-last-month'
@@ -492,7 +544,7 @@ export class PeriodComparisonComponent implements OnInit {
       if (defaultPreset) {
         await this.selectPreset(defaultPreset);
       }
-      
+
       // Removed success notification - not critical
     } catch (error) {
       this.notificationService.error('Error al recargar los datos');
@@ -506,14 +558,14 @@ export class PeriodComparisonComponent implements OnInit {
     const hasIncomes = this.stateService.incomes().length > 0;
 
     // Only add sample data once - check if we're in browser first
-    const hasAddedSampleData = isPlatformBrowser(this.platformId) 
+    const hasAddedSampleData = isPlatformBrowser(this.platformId)
       ? localStorage.getItem('sample-data-added') === 'true'
       : false;
 
     if (!hasExpenses && !hasIncomes && !hasAddedSampleData) {
       // Add some sample data for demonstration
       await this.addSampleData();
-      
+
       // Set flag only in browser
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem('sample-data-added', 'true');
@@ -970,7 +1022,9 @@ export class PeriodComparisonComponent implements OnInit {
   }
 
   getPeriod1Label(): string {
-    return this.currentComparison()?.period1?.range?.label || 'Período Anterior';
+    return (
+      this.currentComparison()?.period1?.range?.label || 'Período Anterior'
+    );
   }
 
   getPeriod2Label(): string {
@@ -989,7 +1043,7 @@ export class PeriodComparisonComponent implements OnInit {
       'current-quarter-vs-last': '📊',
       'last-3-vs-3-before': '📈',
       'current-vs-last-semester': '📋',
-      'ytd-vs-ytd': '🎯'
+      'ytd-vs-ytd': '🎯',
     };
     return icons[presetId] || '📊';
   }
@@ -1018,8 +1072,8 @@ export class PeriodComparisonComponent implements OnInit {
     const current = this.getBalanceValue1();
     const previous = this.getBalanceValue2();
     const diff = current - previous;
-    const percentage = previous !== 0 ? Math.abs(diff / previous * 100) : 0;
-    
+    const percentage = previous !== 0 ? Math.abs((diff / previous) * 100) : 0;
+
     if (diff > 0) {
       return `+${Math.abs(diff).toFixed(0)}€ (+${percentage.toFixed(1)}%)`;
     } else if (diff < 0) {
@@ -1040,8 +1094,8 @@ export class PeriodComparisonComponent implements OnInit {
     const current = this.getIncomeValue1();
     const previous = this.getIncomeValue2();
     const diff = current - previous;
-    const percentage = previous !== 0 ? Math.abs(diff / previous * 100) : 0;
-    
+    const percentage = previous !== 0 ? Math.abs((diff / previous) * 100) : 0;
+
     if (diff > 0) {
       return `+${Math.abs(diff).toFixed(0)}€ (+${percentage.toFixed(1)}%)`;
     } else if (diff < 0) {
@@ -1063,8 +1117,8 @@ export class PeriodComparisonComponent implements OnInit {
     const current = this.getExpenseValue1();
     const previous = this.getExpenseValue2();
     const diff = current - previous;
-    const percentage = previous !== 0 ? Math.abs(diff / previous * 100) : 0;
-    
+    const percentage = previous !== 0 ? Math.abs((diff / previous) * 100) : 0;
+
     if (diff > 0) {
       return `+${Math.abs(diff).toFixed(0)}€ (+${percentage.toFixed(1)}%)`;
     } else if (diff < 0) {
@@ -1076,10 +1130,12 @@ export class PeriodComparisonComponent implements OnInit {
   exportComparison(): void {
     const comparison = this.currentComparison();
     if (!comparison) return;
-    
+
     try {
       this.exportService.exportComparisonToCSV(comparison);
-      this.notificationService.success('Comparación exportada a CSV correctamente');
+      this.notificationService.success(
+        'Comparación exportada a CSV correctamente'
+      );
     } catch (error) {
       this.notificationService.error('Error al exportar la comparación');
     }

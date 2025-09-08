@@ -319,11 +319,14 @@ export class StatsComponent {
     const filters = this.currentFilters();
     if (!filters) return expenses;
 
-    return expenses.filter(expense => {
+    return expenses.filter((expense) => {
       // Filtro por rango de fechas
       if (filters.dateRange) {
         const expenseDate = expense.date.split('T')[0];
-        if (expenseDate < filters.dateRange.start || expenseDate > filters.dateRange.end) {
+        if (
+          expenseDate < filters.dateRange.start ||
+          expenseDate > filters.dateRange.end
+        ) {
           return false;
         }
       }
@@ -336,10 +339,16 @@ export class StatsComponent {
       }
 
       // Filtro por rango de montos
-      if (filters.minAmount !== undefined && expense.amount < filters.minAmount) {
+      if (
+        filters.minAmount !== undefined &&
+        expense.amount < filters.minAmount
+      ) {
         return false;
       }
-      if (filters.maxAmount !== undefined && expense.amount > filters.maxAmount) {
+      if (
+        filters.maxAmount !== undefined &&
+        expense.amount > filters.maxAmount
+      ) {
         return false;
       }
 
@@ -352,11 +361,14 @@ export class StatsComponent {
     const filters = this.currentFilters();
     if (!filters) return incomes;
 
-    return incomes.filter(income => {
+    return incomes.filter((income) => {
       // Filtro por rango de fechas
       if (filters.dateRange) {
         const incomeDate = income.date.split('T')[0];
-        if (incomeDate < filters.dateRange.start || incomeDate > filters.dateRange.end) {
+        if (
+          incomeDate < filters.dateRange.start ||
+          incomeDate > filters.dateRange.end
+        ) {
           return false;
         }
       }
@@ -369,10 +381,16 @@ export class StatsComponent {
       }
 
       // Filtro por rango de montos
-      if (filters.minAmount !== undefined && income.amount < filters.minAmount) {
+      if (
+        filters.minAmount !== undefined &&
+        income.amount < filters.minAmount
+      ) {
         return false;
       }
-      if (filters.maxAmount !== undefined && income.amount > filters.maxAmount) {
+      if (
+        filters.maxAmount !== undefined &&
+        income.amount > filters.maxAmount
+      ) {
         return false;
       }
 
@@ -385,7 +403,7 @@ export class StatsComponent {
     const filters = this.currentFilters();
     if (!filters) return expenses;
 
-    return expenses.filter(expense => {
+    return expenses.filter((expense) => {
       // Filtro por categorías
       if (filters.categories && filters.categories.length > 0) {
         if (!filters.categories.includes(expense.category || 'Sin categoría')) {
@@ -394,10 +412,16 @@ export class StatsComponent {
       }
 
       // Filtro por rango de montos
-      if (filters.minAmount !== undefined && expense.amount < filters.minAmount) {
+      if (
+        filters.minAmount !== undefined &&
+        expense.amount < filters.minAmount
+      ) {
         return false;
       }
-      if (filters.maxAmount !== undefined && expense.amount > filters.maxAmount) {
+      if (
+        filters.maxAmount !== undefined &&
+        expense.amount > filters.maxAmount
+      ) {
         return false;
       }
 
@@ -409,7 +433,7 @@ export class StatsComponent {
     const filters = this.currentFilters();
     if (!filters) return incomes;
 
-    return incomes.filter(income => {
+    return incomes.filter((income) => {
       // Filtro por fuentes
       if (filters.sources && filters.sources.length > 0) {
         if (!filters.sources.includes(income.source || 'Ingreso general')) {
@@ -418,10 +442,16 @@ export class StatsComponent {
       }
 
       // Filtro por rango de montos
-      if (filters.minAmount !== undefined && income.amount < filters.minAmount) {
+      if (
+        filters.minAmount !== undefined &&
+        income.amount < filters.minAmount
+      ) {
         return false;
       }
-      if (filters.maxAmount !== undefined && income.amount > filters.maxAmount) {
+      if (
+        filters.maxAmount !== undefined &&
+        income.amount > filters.maxAmount
+      ) {
         return false;
       }
 
@@ -526,16 +556,24 @@ export class StatsComponent {
       const allMonthIncomes = this.state
         .incomes()
         .filter((i) => i.date.startsWith(monthStr));
-      
+
       const allMonthExpenses = this.state
         .expenses()
         .filter((e) => e.date.startsWith(monthStr));
 
-      const filteredMonthIncomes = this.filterIncomesWithoutDate(allMonthIncomes);
-      const filteredMonthExpenses = this.filterExpensesWithoutDate(allMonthExpenses);
+      const filteredMonthIncomes =
+        this.filterIncomesWithoutDate(allMonthIncomes);
+      const filteredMonthExpenses =
+        this.filterExpensesWithoutDate(allMonthExpenses);
 
-      const monthIncomes = filteredMonthIncomes.reduce((sum: number, i: any) => sum + (i.amount || 0), 0);
-      const monthExpenses = filteredMonthExpenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+      const monthIncomes = filteredMonthIncomes.reduce(
+        (sum: number, i: any) => sum + (i.amount || 0),
+        0
+      );
+      const monthExpenses = filteredMonthExpenses.reduce(
+        (sum: number, e: any) => sum + (e.amount || 0),
+        0
+      );
 
       months.push({
         month: monthName,

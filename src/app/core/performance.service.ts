@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PerformanceService {
   private memoCache = new Map<string, any>();
@@ -12,7 +12,7 @@ export class PerformanceService {
    */
   memoize<T>(key: string, fn: () => T, ttl: number = this.CACHE_TTL): T {
     const cached = this.memoCache.get(key);
-    
+
     if (cached && Date.now() - cached.timestamp < ttl) {
       return cached.value;
     }
@@ -20,7 +20,7 @@ export class PerformanceService {
     const result = fn();
     this.memoCache.set(key, {
       value: result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return result;
@@ -53,7 +53,7 @@ export class PerformanceService {
     wait: number
   ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout;
-    
+
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
@@ -68,12 +68,12 @@ export class PerformanceService {
     limit: number
   ): (...args: Parameters<T>) => void {
     let inThrottle: boolean;
-    
+
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -97,7 +97,7 @@ export class PerformanceService {
     const start = performance.now();
     const result = fn();
     const end = performance.now();
-    
+
     console.log(`🔍 Performance [${label}]: ${(end - start).toFixed(2)}ms`);
     return result;
   }
@@ -105,12 +105,17 @@ export class PerformanceService {
   /**
    * Async performance measurement
    */
-  async measureAsyncPerformance<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  async measureAsyncPerformance<T>(
+    label: string,
+    fn: () => Promise<T>
+  ): Promise<T> {
     const start = performance.now();
     const result = await fn();
     const end = performance.now();
-    
-    console.log(`🔍 Async Performance [${label}]: ${(end - start).toFixed(2)}ms`);
+
+    console.log(
+      `🔍 Async Performance [${label}]: ${(end - start).toFixed(2)}ms`
+    );
     return result;
   }
 }
