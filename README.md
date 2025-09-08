@@ -108,43 +108,75 @@ Una aplicación web moderna y completa para la gestión inteligente de finanzas 
 
 ```
 src/app/
-├── components/           # Componentes de UI
-│   ├── dashboard/       # Dashboard principal
-│   ├── expense-form/    # Formulario de gastos
-│   ├── expense-list/    # Lista de gastos
-│   ├── income-form/     # Formulario de ingresos
-│   ├── income-list/     # Lista de ingresos
-│   ├── period-comparison/ # Comparación de períodos
-│   ├── projections/     # Proyecciones de gastos
-│   │   ├── projections.component.ts # Componente principal
-│   │   └── projection-settings.component.ts # Configuraciones
-│   ├── budget-alerts/   # Alertas de presupuesto (NUEVO)
-│   │   ├── budget-alerts.component.ts # Gestión de alertas
-│   │   ├── budget-alerts.component.html # Interfaz completa
-│   │   └── budget-alerts.component.scss # Estilos personalizados
-│   ├── stats/          # Estadísticas y gráficos
-│   └── charts/         # Componentes de gráficos
-├── core/               # Servicios principales
-│   ├── state.service.ts      # Estado global
-│   ├── notification.service.ts # Notificaciones
-│   ├── chart.service.ts      # Gráficos
-│   ├── projection.service.ts # Proyecciones (NUEVO)
-│   ├── export.service.ts     # Exportación
-│   ├── loading.service.ts    # Estados de carga
-│   ├── storage.service.ts    # Almacenamiento
-│   ├── budget.service.ts     # Gestión de presupuestos (NUEVO)
-│   └── pwa.service.ts        # PWA features
-├── models/             # Interfaces y tipos
-│   ├── expense.model.ts
-│   ├── income.model.ts
-│   ├── projection.model.ts   # Modelos de proyección
-│   └── budget.model.ts       # Modelos de presupuesto (NUEVO)
-├── shared/             # Componentes compartidos
-│   ├── confirm-modal.component.ts # Modal de confirmación
-│   ├── projection-validation.utils.ts # Validaciones
-│   ├── budget-validation.utils.ts # Validaciones de presupuesto (NUEVO)
-│   └── ... # Otros componentes compartidos
-└── utils/              # Utilidades
+├── core/                    # Servicios transversales y configuración
+│   ├── loading.service.ts
+│   ├── notification.service.ts
+│   ├── storage.service.ts
+│   ├── state.service.ts
+│   ├── performance.service.ts
+│   ├── pwa.service.ts
+│   └── http.interceptors.ts
+│
+├── features/                # Características/módulos funcionales
+│   ├── expenses/           # Todo lo relacionado con gastos
+│   │   ├── expense-form/
+│   │   ├── expense-list/
+│   │   ├── expense.service.ts
+│   │   └── index.ts
+│   │
+│   ├── income/             # Todo lo relacionado con ingresos
+│   │   ├── income-form/
+│   │   ├── income-list/
+│   │   ├── income.service.ts
+│   │   └── index.ts
+│   │
+│   ├── budget/             # Presupuestos y alertas
+│   │   ├── budget-alerts/
+│   │   ├── budget.service.ts
+│   │   └── index.ts
+│   │
+│   ├── dashboard/          # Panel principal
+│   │   ├── dashboard.component.*
+│   │   └── index.ts
+│   │
+│   ├── projections/        # Proyecciones de gastos
+│   │   ├── projections.component.*
+│   │   ├── projection-settings.component.*
+│   │   ├── projection.service.ts
+│   │   └── index.ts
+│   │
+│   └── stats/              # Estadísticas y comparaciones
+│       ├── stats.component.*
+│       ├── period-comparison/
+│       ├── period-comparison.service.*
+│       └── index.ts
+│
+├── shared/                 # Recursos compartidos
+│   ├── components/         # Componentes reutilizables
+│   │   ├── charts/        # Gráficos y visualizaciones
+│   │   ├── confirm-modal.component.*
+│   │   ├── edit-*-modal.component.*
+│   │   ├── notification-container.component.*
+│   │   ├── filter-*.pipe.ts
+│   │   └── index.ts
+│   │
+│   ├── models/            # Interfaces y tipos
+│   │   ├── expense.model.ts
+│   │   ├── income.model.ts
+│   │   ├── budget.model.ts
+│   │   ├── projection.model.ts
+│   │   └── index.ts
+│   │
+│   └── utils/             # Utilidades y validaciones
+│       ├── id.ts
+│       ├── export.service.ts
+│       ├── *-validation.utils.ts
+│       └── index.ts
+│
+├── app.component.*
+├── app.config.*
+├── app.routes.ts
+└── main.ts
 ```
 
 ### 🔧 Servicios Principales
