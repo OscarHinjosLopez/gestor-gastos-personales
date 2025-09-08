@@ -93,17 +93,17 @@ export class BudgetAlertsComponent implements OnInit {
     if (!this.isBrowser) return [];
     return this.budgetService.budgets();
   });
-  
+
   alerts = computed(() => {
     if (!this.isBrowser) return [];
     return this.getFilteredAlerts();
   });
-  
+
   budgetStatuses = computed(() => {
     if (!this.isBrowser) return [];
     return this.budgetService.getAllBudgetStatuses();
   });
-  
+
   budgetSummary = computed(() => {
     if (!this.isBrowser) {
       return {
@@ -119,7 +119,7 @@ export class BudgetAlertsComponent implements OnInit {
     }
     return this.budgetService.budgetSummary();
   });
-  
+
   configuration = computed(() => {
     if (!this.isBrowser) {
       // Return default configuration for SSR
@@ -138,12 +138,12 @@ export class BudgetAlertsComponent implements OnInit {
     }
     return this.budgetService.configuration();
   });
-  
+
   unreadAlerts = computed(() => {
     if (!this.isBrowser) return [];
     return this.budgetService.unreadAlerts();
   });
-  
+
   criticalAlerts = computed(() => {
     if (!this.isBrowser) return [];
     return this.budgetService.criticalAlerts();
@@ -209,7 +209,7 @@ export class BudgetAlertsComponent implements OnInit {
   getFilteredAlerts(): BudgetAlert[] {
     // Return empty array for SSR to avoid service calls
     if (!this.isBrowser) return [];
-    
+
     const filters = this.alertFilters();
     const sortOptions = {
       field: 'triggeredAt' as const,
@@ -374,7 +374,7 @@ export class BudgetAlertsComponent implements OnInit {
   loadConfigurationIntoForm(): void {
     // Additional SSR guard
     if (!this.isBrowser) return;
-    
+
     try {
       const config = this.configuration();
       this.configForm.patchValue({
