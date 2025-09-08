@@ -5,8 +5,10 @@ import {
   computed,
   inject,
   OnInit,
+  PLATFORM_ID,
+  Inject,
 } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -37,7 +39,6 @@ import { BudgetValidator } from '../../../shared/utils/budget-validation.utils';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CurrencyPipe,
     DatePipe,
     ConfirmModalComponent,
   ],
@@ -50,6 +51,8 @@ export class BudgetAlertsComponent implements OnInit {
   private loadingService = inject(LoadingService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   // Signals for reactive state
   private selectedTabSignal = signal<'alerts' | 'budgets' | 'settings'>(
@@ -85,14 +88,66 @@ export class BudgetAlertsComponent implements OnInit {
       : null;
   });
 
-  // Data from service
-  budgets = computed(() => this.budgetService.budgets());
-  alerts = computed(() => this.getFilteredAlerts());
-  budgetStatuses = computed(() => this.budgetService.getAllBudgetStatuses());
-  budgetSummary = computed(() => this.budgetService.budgetSummary());
-  configuration = computed(() => this.budgetService.configuration());
-  unreadAlerts = computed(() => this.budgetService.unreadAlerts());
-  criticalAlerts = computed(() => this.budgetService.criticalAlerts());
+  // Data from service (with SSR guards)
+  budgets = computed(() => {
+    if (!this.isBrowser) return [];
+    return this.budgetService.budgets();
+  });
+  
+  alerts = computed(() => {
+    if (!this.isBrowser) return [];
+    return this.getFilteredAlerts();
+  });
+  
+  budgetStatuses = computed(() => {
+    if (!this.isBrowser) return [];
+    return this.budgetService.getAllBudgetStatuses();
+  });
+  
+  budgetSummary = computed(() => {
+    if (!this.isBrowser) {
+      return {
+        totalBudgets: 0,
+        activeBudgets: 0,
+        totalAllocated: 0,
+        totalSpent: 0,
+        totalRemaining: 0,
+        overBudgetCount: 0,
+        alertsCount: 0,
+        averageUsagePercentage: 0,
+      };
+    }
+    return this.budgetService.budgetSummary();
+  });
+  
+  configuration = computed(() => {
+    if (!this.isBrowser) {
+      // Return default configuration for SSR
+      return {
+        id: 'default',
+        enableNotifications: true,
+        soundEnabled: false,
+        emailNotifications: false,
+        dailyDigest: false,
+        weeklyReport: false,
+        autoCreateMonthlyBudgets: false,
+        defaultWarningThreshold: 80,
+        defaultDangerThreshold: 95,
+        categories: [],
+      };
+    }
+    return this.budgetService.configuration();
+  });
+  
+  unreadAlerts = computed(() => {
+    if (!this.isBrowser) return [];
+    return this.budgetService.unreadAlerts();
+  });
+  
+  criticalAlerts = computed(() => {
+    if (!this.isBrowser) return [];
+    return this.budgetService.criticalAlerts();
+  });
 
   // Available categories for budgets
   availableCategories = [
@@ -136,7 +191,13 @@ export class BudgetAlertsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadConfigurationIntoForm();
+    // Only load configuration in browser to avoid SSR issues
+    // Use setTimeout to defer execution and avoid blocking SSR
+    if (this.isBrowser) {
+      setTimeout(() => {
+        this.loadConfigurationIntoForm();
+      }, 0);
+    }
   }
 
   // Tab navigation
@@ -146,6 +207,9 @@ export class BudgetAlertsComponent implements OnInit {
 
   // Alert management
   getFilteredAlerts(): BudgetAlert[] {
+    // Return empty array for SSR to avoid service calls
+    if (!this.isBrowser) return [];
+    
     const filters = this.alertFilters();
     const sortOptions = {
       field: 'triggeredAt' as const,
@@ -308,17 +372,24 @@ export class BudgetAlertsComponent implements OnInit {
 
   // Configuration management
   loadConfigurationIntoForm(): void {
-    const config = this.configuration();
-    this.configForm.patchValue({
-      enableNotifications: config.enableNotifications,
-      soundEnabled: config.soundEnabled,
-      emailNotifications: config.emailNotifications,
-      dailyDigest: config.dailyDigest,
-      weeklyReport: config.weeklyReport,
-      autoCreateMonthlyBudgets: config.autoCreateMonthlyBudgets,
-      defaultWarningThreshold: config.defaultWarningThreshold,
-      defaultDangerThreshold: config.defaultDangerThreshold,
-    });
+    // Additional SSR guard
+    if (!this.isBrowser) return;
+    
+    try {
+      const config = this.configuration();
+      this.configForm.patchValue({
+        enableNotifications: config.enableNotifications,
+        soundEnabled: config.soundEnabled,
+        emailNotifications: config.emailNotifications,
+        dailyDigest: config.dailyDigest,
+        weeklyReport: config.weeklyReport,
+        autoCreateMonthlyBudgets: config.autoCreateMonthlyBudgets,
+        defaultWarningThreshold: config.defaultWarningThreshold,
+        defaultDangerThreshold: config.defaultDangerThreshold,
+      });
+    } catch (error) {
+      console.warn('Error loading configuration in SSR:', error);
+    }
   }
 
   async saveConfiguration(): Promise<void> {
@@ -365,10 +436,15 @@ export class BudgetAlertsComponent implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount);
+    // Only format currency in browser to avoid SSR issues
+    if (this.isBrowser) {
+      return new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(amount);
+    }
+    // Fallback for SSR
+    return `€${amount.toFixed(2)}`;
   }
 
   getDaysRemainingText(days: number): string {

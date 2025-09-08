@@ -47,6 +47,7 @@ export const routes: Routes = [
       import('./features/budget/budget-alerts/budget-alerts.component').then(
         (m) => m.BudgetAlertsComponent
       ),
+    data: { prerender: false }, // Disable SSR prerendering for this route
   },
   { path: '**', redirectTo: '' },
 ];

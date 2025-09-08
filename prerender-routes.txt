@@ -1,0 +1,6 @@
+/
+/expenses
+/incomes
+/stats
+/comparison
+/projections
