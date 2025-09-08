@@ -10,9 +10,9 @@ import { RouterOutlet, Router } from '@angular/router';
 import { StateService } from './core/state.service';
 import { LoadingService } from './core/loading.service';
 import { PwaService } from './core/pwa.service';
-import { ExpenseFormComponent } from './components/expense-form/expense-form.component';
-import { IncomeFormComponent } from './components/income-form/income-form.component';
-import { NotificationContainerComponent } from './shared/notification-container.component';
+import { ExpenseFormComponent } from './features/expenses/expense-form/expense-form.component';
+import { IncomeFormComponent } from './features/income/income-form/income-form.component';
+import { NotificationContainerComponent } from './shared/components/notification-container.component';
 
 @Component({
   selector: 'app-root',

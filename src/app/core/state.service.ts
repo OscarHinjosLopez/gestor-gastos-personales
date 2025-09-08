@@ -1,12 +1,12 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Expense } from '../models/expense.model';
-import { Income } from '../models/income.model';
-import { ExpenseService } from './expense.service';
-import { IncomeService } from './income.service';
+import { Expense } from '../shared/models/expense.model';
+import { Income } from '../shared/models/income.model';
+import { ExpenseService } from '../features/expenses/expense.service';
+import { IncomeService } from '../features/income/income.service';
 import { LoadingService } from './loading.service';
 import { NotificationService } from './notification.service';
-import { DataValidator } from '../shared/validation.utils';
-import { generateId } from '../utils/id';
+import { DataValidator } from '../shared/utils/validation.utils';
+import { generateId } from '../shared/utils/id';
 
 @Injectable({ providedIn: 'root' })
 export class StateService {

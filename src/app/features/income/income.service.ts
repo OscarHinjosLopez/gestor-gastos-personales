@@ -1,0 +1,24 @@
+import { Injectable, inject } from '@angular/core';
+import { StorageService } from '../../core/storage.service';
+import { Income } from '../../shared/models/income.model';
+
+@Injectable({ providedIn: 'root' })
+export class IncomeService {
+  private storage = inject(StorageService);
+
+  getAll() {
+    return this.storage.getAll<Income>('incomes');
+  }
+
+  create(income: Income) {
+    return this.storage.put<Income>('incomes', income);
+  }
+
+  update(income: Income) {
+    return this.storage.put<Income>('incomes', income);
+  }
+
+  delete(id: string) {
+    return this.storage.delete('incomes', id);
+  }
+}
